@@ -30,6 +30,11 @@ agent_created: true
 
 ## 六步流程
 
+> **命令约定（跨平台）**
+>
+> - `python3` 指本机 Python 3 解释器。**Windows** 上改用 `python` 或 `py -3`，路径分隔符用 `\`。
+> - 命令在本 skill 的 base 目录执行，产物用 `--outdir` 指到工作目录。PDF 解析需 `pdfplumber`（缺失时回退 `pypdf`）。
+
 ### Step 0 · 解析标的
 
 用户给名字还是代码都行，`topSearch` 接口两者通吃。先确认是 **A 股上市主体**（同名公司、ADR、ETF 要排除），并把 `code / 简称 / orgId` 三个值记下来，后面每一步都要用。

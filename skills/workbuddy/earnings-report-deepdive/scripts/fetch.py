@@ -157,6 +157,15 @@ def extract_text(pdf_path):
         return None, f"PDF 解析失败: {exc}"
 
 
+def pypdf_available():
+    """检测 PDF 文本提取依赖。缺失时必须显式告警，不能让"没装库"看起来像"文件里没文本"。"""
+    try:
+        from pypdf import PdfReader  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 # ---- 业绩披露类文件的识别口径（当日模式与最新模式共用，口径必须一致）----
 #
 # 踩坑记录（勿简化为一句「业绩预告」）：
@@ -338,6 +347,11 @@ def run_latest(code, org_id, name, today, out, no_download):
         print(f"  ⚠ 非当日披露，距今天 {days_ago} 天。分析前必须向用户说明这一点。")
 
     os.makedirs(out, exist_ok=True)
+    if not no_download and not pypdf_available():
+        print(
+            "  ⚠ pypdf 未安装：只下载 PDF，不提取文本，读不到原文。"
+            "装好后重跑一次：python3 -m pip install pypdf"
+        )
     for it in batch:
         mark = "摘要" if "摘要" in it["title"] else "全文"
         print(f"  {it['date']} {it['weekday']}  [{mark}] {it['title']}  距今 {days_ago} 天")
@@ -458,6 +472,11 @@ def main():
 
     if not args.no_download and items:
         os.makedirs(args.out, exist_ok=True)
+        if not pypdf_available():
+            warnings.append(
+                "pypdf 未安装：本批次只下载了 PDF，未提取任何文本，读不到原文。"
+                "装好后重跑一次：python3 -m pip install pypdf（Windows 用 python -m pip install pypdf）"
+            )
         for it in items:
             if not it["pdf_url"]:
                 continue

@@ -156,6 +156,15 @@ def extract_text(pdf_path):
         return None, f"PDF 解析失败: {exc}"
 
 
+def pypdf_available():
+    """检测 PDF 文本提取依赖。缺失时必须显式告警，不能让"没装库"看起来像"文件里没文本"。"""
+    try:
+        from pypdf import PdfReader  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 def market_probe(day):
     """全市场某日公告总条数，用于 0 条时自检接口是否正常。
 
@@ -309,6 +318,11 @@ def main():
 
     if not args.no_download and items:
         os.makedirs(args.out, exist_ok=True)
+        if not pypdf_available():
+            warnings.append(
+                "pypdf 未安装：本批次只下载了 PDF，未提取任何文本，读不到原文。"
+                "装好后重跑一次：python3 -m pip install pypdf（Windows 用 python -m pip install pypdf）"
+            )
         for it in items:
             if not it["pdf_url"]:
                 continue
