@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<!--
+  业绩披露研判报告模板
+  用法：复制本文件 → 按注释替换 {{...}} → 保存为 <名称><代码>_业绩披露_<YYYY-MM-DD>.html
+
+  仅 A 分支使用本模板（确有业绩预告/季报/半年报/年报或其摘要可分析）。
+  B 分支不出报告：直接一段话回复「今日无新的业绩报告」后结束，不生成文件。
+
+  两种检索模式都走本模板：
+    · 默认（仅当日）—— {{披露日}} 就是今天，{{时效提示}} 整块删除
+    · 最新数据（用户明确要求）—— 必须保留 {{时效提示}} 区块，醒目写明披露日与距今天数
+
+  区块取舍：整段删除用不上的区块，不要留空标题。
+  配色：A 股习惯，涨用 .up(#c0392b)，跌用 .down(#1e7b45)。light 主题，勿改深色。
+  自检：所有表格下方必须有 .src 标注来源与口径；自行测算的指标要注明「非公司披露口径」。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{标的}}（{{代码}}）研判 · {{日期}}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:0; background:#f4f5f7; color:#1c1f23; line-height:1.78; font-size:15px;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; }
+  .wrap { max-width:1020px; margin:0 auto; padding:32px 22px 60px; }
+  .card { background:#fff; border:1px solid #e3e6ea; border-radius:10px; padding:26px 28px; margin-bottom:20px; }
+  h1 { font-size:25px; line-height:1.45; margin:0 0 10px; letter-spacing:-0.3px; }
+  h2 { font-size:18px; margin:0 0 14px; padding-left:11px; border-left:3px solid #2f4a6d; line-height:1.4; }
+  h3 { font-size:15.5px; margin:22px 0 8px; color:#2f4a6d; }
+  h4 { font-size:14.5px; margin:16px 0 6px; color:#3d4a5c; }
+  .meta { color:#6b7280; font-size:13px; margin-bottom:4px; }
+  .meta span { margin-right:14px; }
+  table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px; }
+  th { background:#eef1f5; text-align:left; padding:9px 10px; border:1px solid #dfe3e8; font-weight:600; color:#2f4a6d; }
+  td { padding:9px 10px; border:1px solid #e6e9ed; vertical-align:top; }
+  tr:nth-child(even) td { background:#fafbfc; }
+  .num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .r { text-align:right; }
+  .up { color:#c0392b; font-weight:600; }
+  .down { color:#1e7b45; font-weight:600; }
+  .flag { display:inline-block; padding:4px 14px; border-radius:4px; font-size:20px; font-weight:700;
+    letter-spacing:1px; background:#6b7280; color:#fff; }
+  .flag.bull { background:#c0392b; }
+  .flag.bear { background:#1e7b45; }
+  .flag.neutral { background:#6b7280; }
+  .verdict-box { display:flex; align-items:center; gap:26px; flex-wrap:wrap; background:#f7f8fa;
+    border:1px solid #e3e6ea; border-radius:8px; padding:20px 24px; margin:6px 0 4px; }
+  .v-label { font-size:12px; color:#6b7280; letter-spacing:0.5px; }
+  .v-main { font-size:15px; color:#1c1f23; }
+  .kpi { display:flex; gap:12px; flex-wrap:wrap; margin:16px 0 4px; }
+  .kpi-item { flex:1 1 160px; background:#f7f8fa; border:1px solid #e6e9ed; border-radius:7px; padding:13px 15px; }
+  .kpi-item .k { font-size:11.5px; color:#6b7280; margin-bottom:4px; }
+  .kpi-item .v { font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .kpi-item .s { font-size:11.5px; color:#8a919b; margin-top:2px; }
+  ul, ol { padding-left:22px; margin:10px 0; }
+  li { margin-bottom:8px; }
+  .note { background:#fbf7ec; border-left:3px solid #c9a227; padding:12px 16px; font-size:13.5px;
+    color:#4a4234; border-radius:0 6px 6px 0; margin:14px 0; }
+  .warn { background:#fdf1f0; border-left:3px solid #c0392b; padding:12px 16px; font-size:13.5px;
+    color:#5c2a25; border-radius:0 6px 6px 0; margin:14px 0; }
+  .ok { background:#eef4ef; border-left:3px solid #1e7b45; padding:12px 16px; font-size:13.5px;
+    color:#24432f; border-radius:0 6px 6px 0; margin:14px 0; }
+  .src { font-size:12px; color:#8a919b; margin-top:6px; }
+  .tag { display:inline-block; font-size:11.5px; padding:1px 7px; border-radius:3px;
+    background:#eef1f5; color:#4a5768; margin-right:5px; white-space:nowrap; }
+  .flow { font-size:13.5px; background:#f7f8fa; border:1px solid #e6e9ed; border-radius:7px; padding:14px 18px; margin:12px 0; }
+  .flow b { color:#2f4a6d; }
+  .foot { font-size:12.5px; color:#8a919b; line-height:1.8; }
+  .divider { height:1px; background:#e6e9ed; margin:24px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== 时效提示（仅最新模式保留；当日模式整块删除） ===== -->
+  <!-- 用户明确要求「最新数据」时才会用到。披露日与距今天数必须真实填写，不可省略。 -->
+  <div style="background:#fff8e6;border:1px solid #f0d9a8;border-left:4px solid #d99b1f;
+              border-radius:6px;padding:14px 18px;margin-bottom:16px;">
+    <div style="font-weight:700;color:#8a5a00;font-size:14px;">
+      非当日披露：本报告分析的报告期文件于 {{YYYY-MM-DD}} 披露，距撰写日 {{N}} 天
+    </div>
+    <div style="color:#6b5a33;font-size:13px;margin-top:6px;line-height:1.7;">
+      选用原因：{{用户要求查看最新数据 / 当日无披露但需回溯最近一份 / 其他}}。以下所有数字均来自该份 {{文件类型}}，
+      不含此后 {{N}} 天内发生的新信息；行情部分已覆盖披露日至今，用于观察市场对该份文件的定价结果。
+    </div>
+  </div>
+
+  <!-- ===== 头部 ===== -->
+  <div class="card">
+    <div class="meta">
+      <span>标的：{{公司全称}} {{代码}}.{{SH/SZ}}</span>
+      <span>报告时间：{{YYYY-MM-DD HH:MM}}</span>
+    </div>
+    <h1>{{标题：披露日 + 文件类型 + 核心判断，一句话}}</h1>
+    <p style="color:#4a5768;font-size:14px;margin:6px 0 0;">核查口径：{{数据源与时间边界，例如「巨潮资讯网原始披露，当日范围 YYYY-MM-DD 00:00 至检索时刻」}}</p>
+  </div>
+
+  <!-- ===== 一、核心结论 ===== -->
+  <div class="card">
+    <h2>一、核心结论</h2>
+    <!-- A 分支：写清分析的是哪份文件，不要留空。最新模式下必须带披露日与距今天数 -->
+    <div class="flow">
+      <b>分析对象：</b>{{文件类型}}{{，标题}}{{，披露时间}}{{，距今 N 天（仅最新模式）}}{{，是否经审计}}
+    </div>
+
+    <div class="verdict-box">
+      <div>
+        <div class="v-label">评级</div>
+        <div class="v-main" style="margin-top:6px;"><span class="flag neutral">{{中性}}</span></div>
+        <div style="font-size:12px;color:#8a919b;margin-top:6px;">评级对象：{{XX 年半年度报告}}</div>
+      </div>
+      <div style="width:1px;height:56px;background:#e3e6ea;"></div>
+      <div class="v-main" style="flex:1 1 380px;min-width:280px;">
+        {{2~3 句定级理由，必须可验证，不写「综合来看」}}
+      </div>
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-item"><div class="k">最新收盘</div><div class="v">{{}}</div><div class="s {{up/down}}">{{涨跌幅}}</div></div>
+      <div class="kpi-item"><div class="k">总市值</div><div class="v">{{}}</div><div class="s">流通 {{}}</div></div>
+      <div class="kpi-item"><div class="k">PE(动)</div><div class="v">{{}}</div><div class="s">PB {{}}</div></div>
+      <div class="kpi-item"><div class="k">区间位置</div><div class="v">{{}}</div><div class="s">{{近40日高低与回撤}}</div></div>
+    </div>
+  </div>
+
+  <!-- ===== 二、结论速览：全文数据总表（必写） ===== -->
+  <div class="card">
+    <h2>二、结论速览：全文数据总表</h2>
+    <p>本报告所有表格的关键信息浓缩为下面四张表，后续各节是推导过程与原文依据。</p>
+
+    <h3>表 1 · 披露核查结论</h3>
+    <table>
+      <tr><th style="width:34%">检查项</th><th>结论</th></tr>
+      <!-- 当日模式：填「当日公告条数」；最新模式：改填「回溯窗口 / 距今天数」 -->
+      <tr><td>当日公告条数</td><td>{{N 条，其中纳入范围 M 条}}</td></tr>
+      <tr><td>文件类型</td><td>{{业绩预告 / 季报 / 半年报 / 年报 / 摘要}}</td></tr>
+      <tr><td>接口有效性反证</td><td>{{全市场当日 M 条，接口正常 / 异常}}</td></tr>
+      <tr><td>定级</td><td>{{评级}}</td></tr>
+      <tr><td><b>一句话结论</b></td><td>{{}}</td></tr>
+    </table>
+
+    <!-- 业绩预告 / 业绩快报：把下面这张表整段换成注释后的「区间版」。
+         预告没有毛利率、没有现金流、没有单季拆分，硬填只会是一堆「—」。 -->
+    <h3>表 2 · 最新财报核心数据（同比 + 环比）</h3>
+    <table>
+      <tr><th style="width:26%">指标</th><th class="r">本期</th><th class="r">同比</th><th class="r">单季</th><th class="r">环比</th></tr>
+      <tr><td>营业收入</td><td class="r num">{{}}</td><td class="r num up">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>毛利率</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">—</td><td class="r num">—</td></tr>
+      <tr><td>归母净利润</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>扣非净利润</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>扣非净利率</td><td class="r num">{{}}</td><td class="r num">—</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>经营现金流</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+    </table>
+
+    <!--
+      区间版（业绩预告/业绩快报专用）：取消上面那张表的注释，换成这一张。
+      同时把「表 3 资产负债表关键指标」整节删除——预告没有资产负债表。
+    <h3>表 2 · 业绩预告区间（未经审计）</h3>
+    <table>
+      <tr><th style="width:24%">指标</th><th class="r">下限</th><th class="r">中值</th><th class="r">上限</th><th class="r">上年同期</th><th class="r">同比（中值）</th></tr>
+      <tr><td>营业收入</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>归母净利润</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>扣非净利润</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>归母 − 扣非</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">—</td></tr>
+    </table>
+    <p class="src">{{预告口径：区间上下限取原文披露值；中值为算术平均；同比以上年同期实际数计算，非公司披露口径；未经审计。区间宽度占中值 {{X}}%，宽度越大不确定性越高。}}</p>
+    -->
+
+    <!-- 业绩预告无资产负债表 → 本节整段删除，不要留空表 -->
+    <h3>表 3 · 资产负债表关键指标</h3>
+    <table>
+      <tr><th style="width:20%">指标</th><th class="r">上期末</th><th class="r">本期末</th><th class="r">变动</th><th style="width:30%">前瞻含义</th></tr>
+      <tr><td>合同负债</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td>{{判断其在本题材上是否有预测力}}</td></tr>
+      <tr><td>应收账款</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td>{{周转天数变化}}</td></tr>
+      <tr><td>存货</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td>{{可支撑月数}}</td></tr>
+      <tr><td>存货跌价准备</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td>{{计提率变化}}</td></tr>
+    </table>
+
+    <h3>表 4 · 前瞻推演与风险摘要</h3>
+    <table>
+      <tr><th style="width:22%">期间</th><th class="r">营业收入</th><th class="r">同比</th><th class="r">扣非净利</th><th class="r">归母净利</th></tr>
+      <tr><td>{{下季}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>{{全年}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+    </table>
+    <p class="src">{{推演口径：是否线性外推、公司有无指引、误差来源}}</p>
+  </div>
+
+  <!-- ===== 三、核查过程（可复现） ===== -->
+  <div class="card">
+    <h2>三、核查过程（可复现）</h2>
+    <p>{{当日模式：如何确认当日有无公告——标的身份 → 当日单票检索 → 接口有效性反证，当日 0 条时必须做反证。
+        最新模式：如何定位最近一份——标的身份 → 逐级扩窗（10/30/60/120/240/400 天）→ 确认窗口内公告总数正常，
+        并说明在哪个窗口命中。}}</p>
+    <table>
+      <tr><th style="width:22%">验证层</th><th style="width:42%">做法</th><th>结果</th></tr>
+      <tr><td>标的身份</td><td>{{关键词/代码反查，确认 code / orgId / 市场}}</td><td>{{}}</td></tr>
+      <!-- 当日模式用下面两行；最新模式换成「回溯窗口」「窗口内公告总数」两行 -->
+      <tr><td>当日单票检索</td><td>{{seDate 当日，不限类别}}</td><td class="num">{{total}}</td></tr>
+      <tr><td>接口有效性反证</td><td>{{同接口查全市场同日}}</td><td class="num">{{M 条}}</td></tr>
+    </table>
+    <h3>近期披露节奏</h3>
+    <table>
+      <tr><th style="width:16%">日期</th><th style="width:14%">类型</th><th>标题</th><th style="width:16%">对股价的意义</th></tr>
+      {{逐条}}
+    </table>
+    <div class="note"><b>口径提醒：</b>{{检索截止时刻；非交易日披露的市场反应顺延；A+H 例行披露已剔除}}</div>
+  </div>
+
+  <!-- ===== 四、财报拆解（A 分支必有此节） ===== -->
+  <div class="card">
+    <h2>四、财报拆解：同比与环比</h2>
+    <div class="kpi">
+      <div class="kpi-item"><div class="k">营业收入</div><div class="v">{{}}</div><div class="s up">{{同比}}</div></div>
+      <div class="kpi-item"><div class="k">归母净利</div><div class="v">{{}}</div><div class="s">{{同比}}</div></div>
+      <div class="kpi-item"><div class="k">扣非净利</div><div class="v">{{}}</div><div class="s">{{同比}}</div></div>
+      <div class="kpi-item"><div class="k">毛利率</div><div class="v">{{}}</div><div class="s down">{{变动}}</div></div>
+      <div class="kpi-item"><div class="k">经营现金流</div><div class="v">{{}}</div><div class="s">{{同比}}</div></div>
+    </div>
+
+    <h3>4.1 同比</h3>
+    <table>
+      <tr><th style="width:34%">项目</th><th class="r">本期</th><th class="r">上年同期</th><th class="r">同比</th></tr>
+      {{逐项：营收 / 成本 / 毛利率 / 销售费用 / 管理费用 / 研发费用 / 财务费用 / 减值 / 公允价值变动 / 利润总额 / 归母 / 扣非 / 非经常性损益}}
+    </table>
+    <p class="src">数据来源：{{报告名称 + 巨潮 ID}}。非经常性损益构成：{{逐项拆解与占比}}。</p>
+
+    <h3>4.2 环比</h3>
+    <table>
+      <tr><th style="width:30%">项目</th><th class="r">{{Q1}}</th><th class="r">{{Q2}}</th><th class="r">环比</th><th class="r">{{去年同期单季}}</th></tr>
+      {{逐项}}
+    </table>
+    <div class="warn"><b>最关键的边际数字：</b>{{例如扣非净利率 0.49%，说明转正的厚度}}</div>
+
+    <h3>4.3 分季度历史序列</h3>
+    <table>
+      <tr><th>季度</th><th class="r">{{}}</th><th class="r">{{}}</th><th class="r">{{}}</th><th class="r">{{}}</th></tr>
+      <tr><td>营收</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+      <tr><td>归母</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td><td class="r num">{{}}</td></tr>
+    </table>
+    <p>{{指出收入曲线与利润曲线是否同步——这是理解公司当下状态的核心矛盾}}</p>
+  </div>
+
+  <!-- ===== 五、变化原因 ===== -->
+  <div class="card">
+    <h2>五、变化原因：真改善与一次性</h2>
+    <h3>5.1 真改善</h3>
+    <ul>{{逐条：费用率、收入结构、周转效率，每条带数字}}</ul>
+    <h3>5.2 一次性</h3>
+    <div class="flow"><b>拆账：</b>{{归母 = 扣非 + 非经常性损益；非经常项占比}}</div>
+    <p>{{说明抽掉该项后主业是否仍亏}}</p>
+    <h3>5.3 成本端</h3>
+    <p>{{毛利率变动归因；与上年趋势对比，判断是周期切换还是一次性扰动}}</p>
+  </div>
+
+  <!-- ===== 六、内部矛盾与张力 ===== -->
+  <div class="card">
+    <h2>六、报告内部的一致性与张力</h2>
+    <p>逐段对读后找到 {{N}} 处。注明：<b>这是叙事张力，不等于财务造假</b>。</p>
+    <h3>张力一：{{标题}}</h3>
+    <p>{{原文表述 vs 数据事实}}</p>
+    <h3>张力二：{{标题}}</h3>
+    <p>{{}}</p>
+    <!-- 建议覆盖：时间窗口选择 / 上下游对称性 / 归因模糊 / 动作自相矛盾 / 风险量化缺失 -->
+  </div>
+
+  <!-- ===== 七、风险预警 ===== -->
+  <div class="card">
+    <h2>七、风险预警：按杀伤力量级排序</h2>
+    <table>
+      <tr><th style="width:4%">#</th><th style="width:24%">风险</th><th style="width:44%">具体敞口（带数值）</th><th>触发条件</th></tr>
+      {{逐条，从高到低}}
+    </table>
+  </div>
+
+  <!-- ===== 八、前瞻推演 ===== -->
+  <div class="card">
+    <h2>八、前瞻推演</h2>
+    <h3>8.1 三个前瞻指标</h3>
+    <h4>① {{指标名}}</h4>
+    <p>{{数值 + 同比变化 + 判断}}</p>
+    <h3>8.2 单季推演</h3>
+    <table>
+      <tr><th style="width:26%">项目</th><th class="r">上年同期</th><th class="r">悲观</th><th class="r">基准</th><th class="r">乐观</th></tr>
+      {{逐项}}
+    </table>
+    <div class="note"><b>方法说明：</b>{{边际利润法：营收增量 × 毛利率 − 边际费用 − 税费。公司是否发过指引。误差来源。}}</div>
+
+    <h3>8.3 反方论证</h3>
+    <ul>
+      <li><b>反方一：</b>{{如果毛利率已见底}}</li>
+      <li><b>反方二：</b>{{如果费用率还能降}}</li>
+      <li><b>反方三：</b>{{如果新业务超预期}}</li>
+      <li><b>反方四：</b>{{如果股价已提前反映}}</li>
+    </ul>
+
+    <h3>8.4 股价与事件对齐</h3>
+    <table>
+      <tr><th style="width:26%">时点</th><th class="r">{{标的}}</th><th class="r">{{板块指数}}</th><th>说明</th></tr>
+      {{逐条}}
+    </table>
+    <p class="src">行情来源：{{}}。{{指出是个股阿尔法还是板块贝塔}}</p>
+  </div>
+
+  <!-- ===== 九、该盯什么 ===== -->
+  <div class="card">
+    <h2>九、下一份报告只看这五个数字</h2>
+    <ol>
+      <li><b>{{}}</b>——{{为什么}}</li>
+      <li><b>{{}}</b>——{{}}</li>
+      <li><b>{{}}</b>——{{}}</li>
+      <li><b>{{}}</b>——{{}}</li>
+      <li><b>{{}}</b>——{{}}</li>
+    </ol>
+    <div class="divider"></div>
+    <h3>一句话总结</h3>
+    <p style="font-size:15.5px;">{{把整篇压成一句可复述的话，不要重复结论卡}}</p>
+  </div>
+
+  <!-- ===== 来源与口径 ===== -->
+  <div class="card">
+    <h2>数据来源与口径说明</h2>
+    <ul style="font-size:13.5px;">
+      <li><b>公告与财报原文：</b>巨潮资讯网 www.cninfo.com.cn，{{列出报告名称与 ID}}。</li>
+      <li><b>行情数据：</b>{{源}}，{{前复权}}，截至 {{时点}}。A 股口径，涨红跌绿。</li>
+      <li><b>计算口径提示：</b>{{周转天数、边际推演等自行测算项，注明公式与非公司披露口径}}。</li>
+      <li><b>未能获取的数据：</b>{{如实列出，例如图片型表格}}</li>
+    </ul>
+    <div class="divider"></div>
+    <p class="foot">
+      本报告基于公开披露信息整理与推演，不构成任何投资建议。所有推演均已标注假设与不确定性，实际结果可能显著偏离。<br>
+      生成时间：{{}}｜数据截至：{{}}
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

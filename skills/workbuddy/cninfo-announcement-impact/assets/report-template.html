@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!--
+  公告影响研判报告模板
+  用法：复制本文件 → 替换 {{...}} 占位符 → 保存为 <标的>_公告分析_<日期>.html
+  区块取舍：把「非核心」区块整段删除，不要留空标题。
+  配色遵循 A 股习惯：上涨用红（.up），下跌用绿（.down）。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{标的名称}}（{{代码}}）公告速览与短期股价影响研判 · {{日期}}</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0; background: #f4f5f7; color: #1c1f23; line-height: 1.75; font-size: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 22px 60px; }
+  .card { background: #fff; border: 1px solid #e3e6ea; border-radius: 10px; padding: 26px 28px; margin-bottom: 20px; }
+  h1 { font-size: 25px; line-height: 1.4; margin: 0 0 10px; letter-spacing: -0.3px; }
+  h2 { font-size: 18px; margin: 0 0 14px; padding-left: 11px; border-left: 3px solid #2f4a6d; line-height: 1.4; }
+  h3 { font-size: 15.5px; margin: 22px 0 8px; color: #2f4a6d; }
+  .meta { color: #6b7280; font-size: 13px; margin-bottom: 4px; }
+  .meta span { margin-right: 14px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+  th { background: #eef1f5; text-align: left; padding: 9px 10px; border: 1px solid #dfe3e8; font-weight: 600; color: #2f4a6d; white-space: nowrap; }
+  td { padding: 9px 10px; border: 1px solid #e6e9ed; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .up { color: #c0392b; font-weight: 600; }
+  .down { color: #1e7b45; font-weight: 600; }
+  .flag { display: inline-block; padding: 3px 12px; border-radius: 4px; font-size: 19px; font-weight: 700; letter-spacing: 1px; background: #6b7280; color: #fff; }
+  .flag.bull { background: #c0392b; }
+  .flag.bear { background: #1e7b45; }
+  .flag.neutral { background: #6b7280; }
+  .verdict-box { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; background: #f7f8fa; border: 1px solid #e3e6ea; border-radius: 8px; padding: 20px 24px; margin: 6px 0 4px; }
+  .v-label { font-size: 12px; color: #6b7280; letter-spacing: 0.5px; }
+  .v-main { font-size: 15px; color: #1c1f23; }
+  .scale { display: flex; gap: 4px; margin-top: 8px; }
+  .scale div { font-size: 11px; padding: 4px 9px; border-radius: 3px; background: #e9ecf0; color: #8a919b; }
+  .scale div.on { background: #6b7280; color: #fff; font-weight: 600; }
+  .kpi { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0 4px; }
+  .kpi-item { flex: 1 1 150px; background: #f7f8fa; border: 1px solid #e6e9ed; border-radius: 7px; padding: 13px 15px; }
+  .kpi-item .k { font-size: 11.5px; color: #6b7280; margin-bottom: 4px; }
+  .kpi-item .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi-item .s { font-size: 11.5px; color: #8a919b; margin-top: 2px; }
+  ul, ol { padding-left: 22px; margin: 10px 0; }
+  li { margin-bottom: 7px; }
+  .note { background: #fbf7ec; border-left: 3px solid #c9a227; padding: 12px 16px; font-size: 13.5px; color: #4a4234; border-radius: 0 6px 6px 0; margin: 14px 0; }
+  .warn { background: #fdf1f0; border-left: 3px solid #c0392b; padding: 12px 16px; font-size: 13.5px; color: #5c2a25; border-radius: 0 6px 6px 0; margin: 14px 0; }
+  .src { font-size: 12px; color: #8a919b; margin-top: 6px; }
+  .tag { display: inline-block; font-size: 11.5px; padding: 1px 7px; border-radius: 3px; background: #eef1f5; color: #4a5768; margin-right: 5px; white-space: nowrap; }
+  .tag-p { background: #e8eeea; color: #2c5f42; }
+  .flow { font-size: 13.5px; background: #f7f8fa; border: 1px solid #e6e9ed; border-radius: 7px; padding: 14px 18px; margin: 12px 0; }
+  .flow b { color: #2f4a6d; }
+  .foot { font-size: 12.5px; color: #8a919b; line-height: 1.8; }
+  .divider { height: 1px; background: #e6e9ed; margin: 22px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== 头部 + 结论卡 ===== -->
+  <div class="card">
+    <div class="meta"><span>标的：{{公司全称}}（{{代码}}.SH/SZ · {{板块}}）</span></div>
+    <div class="meta"><span>数据截点：{{时间}}</span><span>检索口径：{{当日 / 近一个月}}</span><span>公告源：巨潮资讯网 cninfo.com.cn</span></div>
+    <h1>{{一句话标题：说清"有/无公告 + 评级"}}</h1>
+
+    <div class="verdict-box">
+      <div>
+        <div class="v-label">综合评级</div>
+        <div class="flag neutral">{{评级}}</div>
+        <div class="scale">
+          <div>重大利空</div><div>利空</div><div class="on">中性</div><div>利好</div><div>重大利好</div>
+        </div>
+      </div>
+      <div class="v-main" style="flex:1 1 380px; min-width:280px;">
+        {{定级核心理由：2~3 句，必须可验证，不写"综合来看">
+      </div>
+    </div>
+
+    <div class="kpi">
+      <!-- 4~5 项：最新价、市值、估值、相对关键价位 -->
+      <div class="kpi-item"><div class="k">最新价</div><div class="v">{{}}</div><div class="s {{up/down}}">{{涨跌幅}}</div></div>
+      <div class="kpi-item"><div class="k">总市值</div><div class="v">{{}}</div><div class="s">{{行业位次}}</div></div>
+      <div class="kpi-item"><div class="k">PE(动)</div><div class="v">{{}}</div><div class="s">{{口径}}</div></div>
+      <div class="kpi-item"><div class="k">较发行价</div><div class="v">{{}}</div><div class="s">{{发行价}}</div></div>
+    </div>
+  </div>
+
+  <!-- ===== 一、抓取结果 ===== -->
+  <div class="card">
+    <h2>一、抓取结果</h2>
+    <p>{{检索口径：当日模式（--days 1）还是近期模式（--days 30，一个月上限），起止日，共 N 条。当日无公告必须明写；公告落在非交易日必须点出；含业绩类文件时注明"已转 earnings-report-deepdive"}}</p>
+    <table>
+      <tr><th style="width:88px">披露日</th><th>公告标题</th><th style="width:78px">编号</th><th style="width:96px">性质</th></tr>
+      {{逐条：日期 / 标题 / 编号 / 程序性或实质分类}}
+    </table>
+    <p class="src">原文 PDF 已下载至 <code>{{目录}}</code>。</p>
+  </div>
+
+  <!-- ===== 二、实质内容 ===== -->
+  <div class="card">
+    <h2>二、公告实质内容</h2>
+    <p>{{把公告正文的关键数字抄出来，不要只写标题。数字必须来自原文}}</p>
+    <table>
+      <tr><th>议案/事项</th><th>金额或比例</th><th>结果</th><th>对判断的意义</th></tr>
+      {{}}
+    </table>
+    <div class="note">{{是否存在"早已披露、今日仅确认"的情况，首次披露距今多少交易日}}</div>
+  </div>
+
+  <!-- ===== 三、预期差（当字面与走势背离时才需要） ===== -->
+  <div class="card">
+    <h2>三、为什么"字面"与"走势"不一致</h2>
+    <p>{{用 --align 得到的首个交易日实际表现作为事实起点，再拆原因}}</p>
+    <h3>1. {{原因一：通常是二阶导/环比失速}}</h3>
+    <h3>2. {{原因二：同业与海外联动}}</h3>
+    <h3>3. {{原因三：筹码与拥挤度}}</h3>
+    <h3>4. {{原因四：结构性漏损或一次性因素}}</h3>
+  </div>
+
+  <!-- ===== 四、传导渠道 ===== -->
+  <div class="card">
+    <h2>四、传导路径：为什么定这个级</h2>
+    <table>
+      <tr><th style="width:130px">传导渠道</th><th style="width:78px">方向</th><th>说明</th></tr>
+      <tr><td>信息增量</td><td><b>{{}}</b></td><td>{{}}</td></tr>
+      <tr><td>盈利预期</td><td>{{}}</td><td>{{}}</td></tr>
+      <tr><td>当期财务</td><td>{{}}</td><td>{{}}</td></tr>
+      <tr><td>筹码 / 资金面</td><td>{{}}</td><td>{{}}</td></tr>
+      <tr><td>治理与情绪</td><td>{{}}</td><td>{{}}</td></tr>
+    </table>
+    <div class="warn"><b>结论：{{评级}}。</b>{{一句话收口 + 强制反方论证：如果这个判断错了，最可能错在哪}}</div>
+  </div>
+
+  <!-- ===== 五、观察变量 ===== -->
+  <div class="card">
+    <h2>五、未来 1~4 周真正该盯的变量</h2>
+    <ol>
+      <li><b>{{权重最高的变量}}</b>——{{为什么，触发条件是什么}}</li>
+      <li><b>{{同业/海外对标}}</b>——{{}}</li>
+      <li><b>{{下一个定期报告或事件时点}}</b>——{{}}</li>
+      <li><b>{{解禁/回购实施/审议节点}}</b>——{{具体日期}}</li>
+    </ol>
+  </div>
+
+  <!-- ===== 六、来源 ===== -->
+  <div class="card">
+    <h2>六、数据来源与口径</h2>
+    <ul>
+      <li>公告原文：巨潮资讯网 <code>www.cninfo.com.cn</code>，{{代码}} / orgId {{}}，检索区间 {{起 ~ 止}}，共 {{N}} 条记录；涉及 {{M}} 份 PDF 已存档。</li>
+      <li>行情数据：{{东财/腾讯}}接口，日 K {{前复权}}，截至 {{时点}}。</li>
+      <li>{{媒体二手口径的标注：哪些结论来自报道、未回溯原始行情源}}</li>
+      <li>{{自行推算的数字，标明"推算，非公司披露口径"}}</li>
+    </ul>
+    <div class="divider"></div>
+    <p class="foot">本文基于公开披露信息整理与分析，不构成任何投资建议。评级仅指向"公告信息对短期股价的边际影响"，不代表对公司长期价值或股价点位的预测。市场有风险，决策请自行独立判断并核实一手资料。</p>
+  </div>
+
+</div>
+</body>
+</html>

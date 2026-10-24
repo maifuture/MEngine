@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{公司}}{{代码}} 研报综述与短中长期指引 | {{日期}}</title>
+<!-- 单文件骨架：纯内联样式、零外部依赖、无 <script>。复制后填空即可。
+     规范详见 references/report-blueprint.md 第七节。 -->
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;color:#1f2430;-webkit-font-smoothing:antialiased;">
+<div style="max-width:960px;margin:0 auto;padding:28px 22px 60px;">
+
+  <!-- 页头 -->
+  <div style="border-bottom:3px solid #1f3a5f;padding-bottom:16px;margin-bottom:22px;">
+    <div style="font-size:12.5px;color:#7b8494;letter-spacing:.5px;">
+      巨潮资讯 · 定期报告 ｜ 新浪财经 · 研究报告 ｜ 数据截至 {{日期}}
+    </div>
+    <h1 style="margin:8px 0 6px;font-size:27px;line-height:1.32;font-weight:700;letter-spacing:-.3px;">
+      {{公司}}（{{代码}}）财报拆解 · 板块归属 · 近 {{N}} 个月研报综述与短中长期指引
+    </h1>
+    <div style="font-size:13.5px;color:#54607a;">{{全称}} ｜ {{板块}} ｜ 总股本 {{股本}} 亿股 ｜ 总市值 {{市值}} 亿元（{{收盘日}} 收盘 {{收盘价}} 元）</div>
+  </div>
+
+  <!-- 结论先行 -->
+  <div style="background:#fff;border:1px solid #e3e7ee;border-left:5px solid #c0392b;border-radius:4px;padding:16px 20px;margin-bottom:20px;">
+    <div style="font-size:13px;font-weight:700;color:#c0392b;letter-spacing:1px;margin-bottom:8px;">核 心 结 论</div>
+    <div style="font-size:15px;line-height:1.85;">
+      <b>① 最新财报</b>{{...}}<br>
+      <b>② Top 2 收入来源</b>：<span style="color:#c0392b;font-weight:700;">{{Top1}}</span>、<span style="color:#c0392b;font-weight:700;">{{Top2}}</span><br>
+      <b>③ 行业与概念</b>：{{申万链条}}；核心概念 {{概念}}<br>
+      <b>④ 研报</b>：近 {{N}} 个月个股研报 <b>{{a}} 篇</b>、行业研报 <b>{{b}} 篇</b><br>
+      <b>⑤ 一句话判断</b>：{{核心判断，必须落到「折价在定价什么 / 赚业绩钱还是估值钱」}}
+    </div>
+  </div>
+
+  <!-- 四张数据卡 -->
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:26px;">
+    <div style="flex:1 1 200px;background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:14px 16px;">
+      <div style="font-size:12px;color:#7b8494;margin-bottom:6px;">{{报告期}} 营业收入</div>
+      <div style="font-size:23px;font-weight:700;">{{营收}} <span style="font-size:13px;font-weight:400;color:#54607a;">亿元</span></div>
+      <div style="font-size:12.5px;color:#c0392b;margin-top:4px;">同比 {{同比}}</div>
+    </div>
+    <div style="flex:1 1 200px;background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:14px 16px;">
+      <div style="font-size:12px;color:#7b8494;margin-bottom:6px;">{{报告期}} 归母净利</div>
+      <div style="font-size:23px;font-weight:700;">{{归母}} <span style="font-size:13px;font-weight:400;color:#54607a;">亿元</span></div>
+      <div style="font-size:12.5px;color:#c0392b;margin-top:4px;">同比 {{同比}}｜扣非 {{扣非同比}}</div>
+    </div>
+    <div style="flex:1 1 200px;background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:14px 16px;">
+      <div style="font-size:12px;color:#7b8494;margin-bottom:6px;">PE(TTM) / PB</div>
+      <div style="font-size:23px;font-weight:700;">{{PE}}<span style="font-size:14px;color:#54607a;">x</span> / {{PB}}<span style="font-size:14px;color:#54607a;">x</span></div>
+      <div style="font-size:12.5px;color:#1a9c6b;margin-top:4px;">年初至今 {{YTD}}</div>
+    </div>
+    <div style="flex:1 1 200px;background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:14px 16px;">
+      <div style="font-size:12px;color:#7b8494;margin-bottom:6px;">机构综合目标价</div>
+      <div style="font-size:23px;font-weight:700;">{{目标价}} <span style="font-size:13px;font-weight:400;color:#54607a;">元</span></div>
+      <div style="font-size:12.5px;color:#c0392b;margin-top:4px;">隐含 {{空间}}</div>
+    </div>
+  </div>
+
+  <!-- 章节标题模板 -->
+  <h2 style="font-size:19px;font-weight:700;margin:34px 0 12px;padding-left:11px;border-left:4px solid #1f3a5f;">一、最新定期报告与 Top 2 收入来源</h2>
+
+  <!-- 取数路径说明块 -->
+  <div style="background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:16px 18px;font-size:13.5px;line-height:1.8;color:#33405a;margin-bottom:14px;">
+    <b style="color:#1f2430;">取数路径与口径</b>：{{巨潮检索路径、PDF 文件名、页数、披露日；未披露期次说明}}
+  </div>
+
+  <!-- 标准表格模板 -->
+  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e3e7ee;font-size:13.5px;">
+    <thead>
+      <tr style="background:#eef1f6;">
+        <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #ccd4e0;color:#1f3a5f;">列名</th>
+        <th style="padding:9px 10px;text-align:right;border-bottom:2px solid #ccd4e0;color:#1f3a5f;">数值</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="background:#fdf6f6;">
+        <td style="padding:9px 10px;border-bottom:1px solid #eceff3;"><b>重点行用浅红底</b></td>
+        <td style="padding:9px 10px;border-bottom:1px solid #eceff3;text-align:right;font-weight:700;color:#c0392b;">{{}}</td>
+      </tr>
+      <tr>
+        <td style="padding:9px 10px;border-bottom:1px solid #eceff3;">普通行</td>
+        <td style="padding:9px 10px;border-bottom:1px solid #eceff3;text-align:right;">{{}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="font-size:12px;color:#95a0b3;margin-top:7px;">数据来源：{{文件/栏目}} {{日期}}</div>
+
+  <!-- 占比条模板（CSS，不用 SVG） -->
+  <div style="background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:18px 20px;margin:14px 0;">
+    <div style="font-size:13px;color:#7b8494;margin-bottom:14px;">{{图注}}</div>
+    <div style="margin-bottom:13px;">
+      <div style="font-size:13px;margin-bottom:4px;"><b>{{名称}}</b> <span style="color:#7b8494;">{{占比}}%</span> <span style="float:right;color:#54607a;">{{注}}</span></div>
+      <div style="background:#eef1f6;height:20px;border-radius:2px;overflow:hidden;"><div style="width:{{占比}}%;height:20px;background:#c0392b;"></div></div>
+    </div>
+  </div>
+
+  <!-- 股价折线 SVG 模板：坐标请先用脚本算好再粘贴
+       公式：x = x0 + i*(x1-x0)/(n-1)；y = y_bottom - (v-vmin)/(vmax-vmin)*(y_bottom-y_top)
+       注意 y 轴向下为正，公式写反会让整条线上下颠倒 -->
+  <div style="background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:18px 20px;margin-bottom:14px;">
+    <div style="font-size:13px;color:#7b8494;margin-bottom:6px;">收盘价走势（{{起}} 至 {{止}}，单位：元）</div>
+    <svg viewBox="0 0 680 215" style="width:100%;height:auto;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="680" height="215" fill="#ffffff"/>
+      <line x1="56" y1="66.1" x2="656" y2="66.1" stroke="#eef1f6" stroke-width="1"/>
+      <line x1="56" y1="110.7" x2="656" y2="110.7" stroke="#eef1f6" stroke-width="1"/>
+      <line x1="56" y1="155.3" x2="656" y2="155.3" stroke="#eef1f6" stroke-width="1"/>
+      <text x="46" y="70" font-size="11" fill="#95a0b3" text-anchor="end">19.0</text>
+      <line x1="56" y1="182" x2="656" y2="182" stroke="#ccd4e0" stroke-width="1"/>
+      <polyline points="{{算好的 x,y 序列}}" fill="none" stroke="#c0392b" stroke-width="2"/>
+      <circle cx="{{x}}" cy="{{y}}" r="3.6" fill="#1f3a5f"/>
+      <text x="{{x}}" y="{{y-10}}" font-size="11.5" fill="#1f3a5f" font-weight="700">{{收盘价}}</text>
+    </svg>
+    <div style="font-size:12px;color:#95a0b3;margin-top:8px;">数据来源：{{行情源}}（{{日期}} 收盘）</div>
+  </div>
+
+  <!-- 七、风险 / 八、口径校验：用上面的表格模板 -->
+
+  <!-- 九、原文出处（外部原始链接） —— 必须放这里（免责声明之前），且必须由脚本生成，不要手写：
+         python3 scripts/build_index.py --dir ./reports --check
+       把脚本输出的整章 HTML 粘到下面这一行注释的位置即可。规则见
+       references/report-blueprint.md 第 7.1 节：链接指外部原始页、只列真实文件、一份不漏、按组倒序。
+       ⚠ 内置预览面板只提供单个 HTML、不暴露同级目录，本地链接（file:// / 相对路径）在那里必然 404，
+         所以一律指外部原始出处，不要做本地文件链接，也不要把正文内嵌进 HTML。
+       下面是脚本输出的形态示意（结构一致即可，勿手敲文件名）： -->
+  <h2 style="font-size:19px;font-weight:700;margin:34px 0 12px;padding-left:11px;border-left:4px solid #1f3a5f;">九、原文出处（外部原始链接）</h2>
+
+  <div style="font-size:12.5px;color:#54607a;line-height:1.9;margin-bottom:12px;">
+    本章只给<b>外部原始出处</b>，不做本地文件跳转。财报指向<b>巨潮资讯网</b>公告原文，研报指向<b>新浪财经</b>研究报告频道原文页。
+    全部 {{N}} 条链接于 <b>{{实测日期}}</b> 逐条实测，均返回 HTTP 200 且页面含正文。若日后失效，可在对应站点用「股票代码 + 标题」或 rptid 检索。
+  </div>
+
+  <div style="background:#fff;border:1px solid #e3e7ee;border-radius:4px;padding:16px 18px;font-size:13px;line-height:1.9;color:#33405a;">
+    <div style="font-size:13px;font-weight:700;color:#1f3a5f;">一手财报（巨潮资讯网）</div>
+    <table style="width:100%;border-collapse:collapse;margin-top:4px;">
+      <tr>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:12.5px;color:#7b8494;white-space:nowrap;">{{披露日}}</td>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:13px;line-height:1.6;">
+          <a href="{{巨潮PDF直链}}" target="_blank" rel="noopener noreferrer" title="巨潮资讯网原文 PDF" style="color:#1f4e79;text-decoration:none;border-bottom:1px solid #c9d6e4;">{{报告全称}}</a>
+          <span style="color:#7b8494;font-size:12.5px;">{{披露日}} 披露 · {{页数}} 页</span><br>
+          <span style="font-size:11.5px;color:#95a0b3;">
+            <a href="{{巨潮公告详情页}}" target="_blank" rel="noopener noreferrer" title="巨潮资讯网公告详情页" style="color:#1f4e79;text-decoration:none;border-bottom:1px solid #c9d6e4;">公告详情页</a>
+            　·　
+            <a href="{{巨潮PDF直链}}" target="_blank" rel="noopener noreferrer" title="PDF 直链" style="color:#1f4e79;text-decoration:none;border-bottom:1px solid #c9d6e4;">PDF 直链</a>（{{大小}}）
+          </span>
+        </td>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:11.5px;color:#95a0b3;text-align:right;white-space:nowrap;">巨潮资讯</td>
+      </tr>
+    </table>
+    <div style="margin-top:16px;font-size:13px;font-weight:700;color:#1f3a5f;">个股研报（{{N}} 篇 · 新浪财经）</div>
+    <table style="width:100%;border-collapse:collapse;margin-top:4px;">
+      <tr>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:12.5px;color:#7b8494;white-space:nowrap;">{{日期}}</td>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:13px;line-height:1.6;">
+          <a href="https://stock.finance.sina.com.cn/stock/go.php/vReport_Show/kind/search/rptid/{{rptid}}/index.phtml" target="_blank" rel="noopener noreferrer" title="{{研报标题}}" style="color:#1f4e79;text-decoration:none;border-bottom:1px solid #c9d6e4;">{{研报标题}}</a>
+          <span style="color:#7b8494;">{{机构简称}}</span>
+        </td>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:11.5px;color:#95a0b3;text-align:right;white-space:nowrap;">新浪财经 · {{rptid}}</td>
+      </tr>
+    </table>
+    <div style="margin-top:16px;font-size:13px;font-weight:700;color:#1f3a5f;">行业研报（{{M}} 篇 · 新浪财经）</div>
+    <table style="width:100%;border-collapse:collapse;margin-top:4px;">
+      <tr>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:12.5px;color:#7b8494;white-space:nowrap;">{{日期}}</td>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:13px;line-height:1.6;">
+          <a href="https://stock.finance.sina.com.cn/stock/go.php/vReport_Show/kind/industry/rptid/{{rptid}}/index.phtml" target="_blank" rel="noopener noreferrer" title="{{研报标题}}" style="color:#1f4e79;text-decoration:none;border-bottom:1px solid #c9d6e4;">{{研报标题}}</a>
+          <span style="color:#7b8494;">{{机构简称}}</span>
+        </td>
+        <td style="padding:7px 10px;border-bottom:1px solid #eceff3;font-size:11.5px;color:#95a0b3;text-align:right;white-space:nowrap;">新浪财经 · {{rptid}}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="font-size:12px;color:#95a0b3;margin-top:8px;">
+    财报为一手来源（巨潮资讯网原文 PDF，{{页数}} 页）；研报正文取自新浪财经研究报告频道公开页面，每篇附 rptid 便于回溯核对。
+    新浪研报页为网页正文形式，无 PDF 直链；巨潮 PDF 为交易所指定披露文件，可直接下载留存。
+  </div>
+
+  <!-- 免责声明：原样保留，禁止改写或省略 -->
+  <div style="background:#f0f2f6;border:1px solid #d8dee8;border-radius:4px;padding:14px 18px;margin:26px 0 10px;font-size:12.5px;line-height:1.85;color:#5b6678;">
+    <b style="color:#33405a;">免责声明</b>：以上内容基于公开数据和量化分析，仅供参考，不构成投资建议。市场有风险，投资需谨慎。任何投资决策应结合个人风险承受能力、资金状况和投资目标独立判断，必要时咨询持牌专业机构。过往表现不预示未来收益。
+  </div>
+
+  <div style="font-size:11.5px;color:#a3adbd;text-align:center;margin-top:18px;line-height:1.8;">
+    报告生成时间：{{日期}} ｜ 财务数据：{{来源}} ｜ 行情数据：{{来源}}<br>
+    研报：新浪财经研究报告频道（近 {{N}} 个月，共 {{总数}} 篇）｜ 单文件离线可读，无外部依赖
+  </div>
+
+</div>
+</body>
+</html>
