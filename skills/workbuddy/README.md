@@ -1,6 +1,6 @@
 # MEngine
 
-A 股研究工作流的一组 [WorkBuddy](https://www.workbuddy.cn) skill，放在 `skills/workbuddy/` 下。
+A 股研究工作流的一组 [WorkBuddy](https://www.workbuddy.cn) skill，都放在本目录下。
 
 每个 skill 都是自包含的：`SKILL.md` 说明流程与判定口径，`scripts/` 是可独立运行的 Python 脚本，`references/` 是分析手册与接口细节。
 
@@ -61,7 +61,7 @@ python3 scripts/check_env.py --quiet   # 退出码 0 即就位
 
 ### 4. 放进 WorkBuddy 的 skill 目录
 
-把 `skills/workbuddy/` 下的四个目录复制到你的 skill 目录：
+把本目录下的四个子目录复制到你的 skill 目录：
 
 | 平台 | 用户级 skill 目录 |
 |---|---|
