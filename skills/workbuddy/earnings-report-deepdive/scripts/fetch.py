@@ -22,6 +22,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+# 同目录模块（交易日历），脚本可能被绝对路径调用，显式补 sys.path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import trading_day  # noqa: E402
+
 UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -166,7 +170,7 @@ def pypdf_available():
         return False
 
 
-# ---- 业绩披露类文件的识别口径（当日模式与最新模式共用，口径必须一致）----
+# ---- 业绩披露类文件的识别口径（默认窗口/仅当日与最新模式共用，口径必须一致）----
 #
 # 踩坑记录（勿简化为一句「业绩预告」）：
 #   1. 「业绩预增/预减/预盈/预亏」四种标题**不含**「业绩预告」四个字。
@@ -294,7 +298,7 @@ def market_probe(day):
 def verify_market(date_arg, today):
     """接口自证：只回答"全市场某日有多少条公告"，不涉及任何标的、不产生分析动作。
 
-    用途：当日模式 0 条时，把"公司确无披露"与"接口没打通／代码错配"区分开。
+    用途：默认窗口或仅当日口径下 0 条时，把"公司确无披露"与"接口没打通／代码错配"区分开。
 
     退出码：0 = 接口正常且全市场有公告；1 = 接口通但全市场 0 条（疑似非交易日）；
             2 = 请求失败或日期非法（无法确认）。
@@ -379,7 +383,8 @@ def main():
     ap = argparse.ArgumentParser(description="巨潮资讯网公告抓取")
     ap.add_argument("--keyword", help="股票名称或简称关键词")
     ap.add_argument("--symbol", help="股票代码，如 688825")
-    ap.add_argument("--days", type=int, default=3, help="从今天往前 N 个自然日（含今天），默认 3")
+    ap.add_argument("--days", type=int, default=None,
+                    help="自然日窗口：从今天往前 N 个自然日（含今天）。省略 = 默认窗口「当日 + 上一交易日」（跳过周末与法定节假日）；--days 1 = 仅当日")
     ap.add_argument("--start", help="起始日 YYYY-MM-DD，与 --end 配合使用")
     ap.add_argument("--end", help="截止日 YYYY-MM-DD")
     ap.add_argument("--latest", action="store_true",
@@ -390,9 +395,16 @@ def main():
         "--verify-market", nargs="?", const="today", metavar="DATE",
         help="只做接口自证：打印全市场某日公告总条数后退出，不需要 --keyword/--symbol。DATE 省略则为今天",
     )
+    ap.add_argument("--today", metavar="DATE",
+                    help="把「今天」覆盖为指定日期 YYYY-MM-DD（调试/补算口径用，默认取北京时间当天）")
     args = ap.parse_args()
 
     today = dt.datetime.now(CST).date()
+    if args.today:
+        try:
+            today = dt.date.fromisoformat(args.today)
+        except ValueError:
+            ap.error("--today 需要 YYYY-MM-DD 格式")
 
     if args.verify_market:
         return verify_market(args.verify_market, today)
@@ -408,8 +420,12 @@ def main():
         )
         return
 
+    window_meta = None
     if args.start and args.end:
         start, end = args.start, args.end
+    elif args.days is None:
+        # 默认窗口：当日 + 上一交易日（跳过周末与法定节假日）
+        start, end, window_meta = trading_day.default_window(today)
     else:
         end_d = today
         start_d = today - dt.timedelta(days=max(args.days - 1, 0))
@@ -465,10 +481,16 @@ def main():
 
     warnings = []
     if not items:
-        warnings.append(
-            f"区间 {start} ~ {end} 内无公告。若用户问的是「今天/昨天」，需自行确认是否确实无披露，"
-            f"并把检索窗口扩大到 10 天以上排查周末公告。"
-        )
+        if window_meta is not None:
+            warnings.append(
+                f"{start} ~ {end} 内无公告（默认口径：当日 + 上一交易日，已跳过周末与法定节假日）。"
+                "已覆盖最近两个交易日，不要再为找公告扩窗。"
+                + ("⚠ 交易日历获取失败，上一交易日为按周末规则估算，跨假期请手动核对。" if window_meta.get("estimated") else "")
+            )
+        elif start == end:
+            warnings.append(f"{start}（仅当日）无公告，口径为 --days 1。")
+        else:
+            warnings.append(f"区间 {start} ~ {end} 内无公告。")
 
     if not args.no_download and items:
         os.makedirs(args.out, exist_ok=True)
@@ -525,6 +547,7 @@ def main():
     payload = {
         "stock": {"code": code, "name": name, "org_id": org_id, "column": column},
         "range": {"start": start, "end": end},
+        "window": window_meta or {"mode": "explicit", "start": start, "end": end},
         "count": len(items),
         "announcements": items,
         "warnings": warnings,
@@ -537,6 +560,9 @@ def main():
         json.dump(payload, fh, ensure_ascii=False, indent=2)
 
     print(f"== {name} ({code})  {start} ~ {end}  共 {len(items)} 条 ==")
+    if window_meta is not None:
+        tail = "  ⚠ 交易日历获取失败，上一交易日为估算值" if window_meta.get("estimated") else ""
+        print(f"   口径：当日 + 上一交易日（上一交易日 {window_meta['previous_trading_day']}）{tail}")
     for it in items:
         if it["hk_disclosure"]:
             flag = "H股披露"

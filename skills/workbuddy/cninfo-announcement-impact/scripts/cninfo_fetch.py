@@ -4,10 +4,13 @@
 定位股票 -> 拉公告列表 -> 下载 PDF -> 提取文本 -> 输出结构化 JSON 与人类可读摘要。
 
 用法:
-  python3 cninfo_fetch.py --symbol 688825                      # 默认仅当日
+  python3 cninfo_fetch.py --symbol 688825                      # 默认窗口：当日 + 上一交易日
+  python3 cninfo_fetch.py --symbol 688825 --days 1              # 仅当日
   python3 cninfo_fetch.py --keyword 长鑫 --days 30 --out ./cninfo_out   # 近期模式：一个月
   python3 cninfo_fetch.py --symbol 688825 --start 2026-09-20 --end 2026-10-21
   python3 cninfo_fetch.py --symbol 688825 --no-download
+
+默认窗口按真实交易日历（上证综指日 K）跳过周末与法定节假日，取 [上一交易日, 今天]。
 
 仅依赖标准库；PDF 文本提取需 pypdf（缺失时自动降级为只下载，并打印安装提示）。
 """
@@ -22,6 +25,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+
+# 同目录模块（交易日历），脚本可能被绝对路径调用，显式补 sys.path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import trading_day  # noqa: E402
 
 UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
@@ -223,7 +230,8 @@ def main():
     ap = argparse.ArgumentParser(description="巨潮资讯网公告抓取")
     ap.add_argument("--keyword", help="股票名称或简称关键词")
     ap.add_argument("--symbol", help="股票代码，如 688825")
-    ap.add_argument("--days", type=int, default=1, help="从今天往前 N 个自然日（含今天），默认 1 = 仅当日；近期模式用 --days 30（一个月上限）")
+    ap.add_argument("--days", type=int, default=None,
+                    help="自然日窗口：从今天往前 N 个自然日（含今天）。省略 = 默认窗口「当日 + 上一交易日」（跳过周末与法定节假日）；--days 1 = 仅当日；近期模式用 --days 30（一个月上限）")
     ap.add_argument("--start", help="起始日 YYYY-MM-DD，与 --end 配合使用")
     ap.add_argument("--end", help="截止日 YYYY-MM-DD")
     ap.add_argument("--out", default="./cninfo_out", help="输出目录")
@@ -232,17 +240,28 @@ def main():
         "--verify-market", nargs="?", const="today", metavar="DATE",
         help="只做接口自证：打印全市场某日公告总条数后退出，不需要 --keyword/--symbol。DATE 省略则为今天",
     )
+    ap.add_argument("--today", metavar="DATE",
+                    help="把「今天」覆盖为指定日期 YYYY-MM-DD（调试/补算口径用，默认取北京时间当天）")
     args = ap.parse_args()
 
     today = dt.datetime.now(CST).date()
+    if args.today:
+        try:
+            today = dt.date.fromisoformat(args.today)
+        except ValueError:
+            ap.error("--today 需要 YYYY-MM-DD 格式")
 
     if args.verify_market:
         return verify_market(args.verify_market, today)
 
     if not args.keyword and not args.symbol:
         ap.error("需要 --keyword 或 --symbol")
+    window_meta = None
     if args.start and args.end:
         start, end = args.start, args.end
+    elif args.days is None:
+        # 默认窗口：当日 + 上一交易日（跳过周末与法定节假日）
+        start, end, window_meta = trading_day.default_window(today)
     else:
         end_d = today
         start_d = today - dt.timedelta(days=max(args.days - 1, 0))
@@ -305,8 +324,13 @@ def main():
         n, err = market_probe(end)
         probe = {"date": end, "market_total": n, "error": err}
         if start == end:
-            end_d = dt.date.fromisoformat(end)
-            empty_notes.append(f"{start}（{WEEKDAYS[end_d.weekday()]}）无公告。默认口径为仅当日。")
+            end_d0 = dt.date.fromisoformat(end)
+            empty_notes.append(f"{start}（{WEEKDAYS[end_d0.weekday()]}）无公告。口径为仅当日（--days 1）。")
+        elif window_meta is not None:
+            empty_notes.append(
+                f"{start} ~ {end} 内无公告（默认口径：当日 + 上一交易日，已跳过周末与法定节假日）。"
+                + ("⚠ 交易日历获取失败，上一交易日为按周末规则估算，跨假期请手动核对。" if window_meta.get("estimated") else "")
+            )
         else:
             empty_notes.append(f"区间 {start} ~ {end} 内无公告。窗口固定为一个月，不要为找公告继续扩窗；如与预期不符，先核对代码/orgId。")
         if err:
@@ -371,6 +395,7 @@ def main():
     payload = {
         "stock": {"code": code, "name": name, "org_id": org_id, "column": column},
         "range": {"start": start, "end": end},
+        "window": window_meta or {"mode": "explicit", "start": start, "end": end},
         "count": len(items),
         "empty": not items,
         "market_probe": probe,
@@ -385,6 +410,9 @@ def main():
         json.dump(payload, fh, ensure_ascii=False, indent=2)
 
     print(f"== {name} ({code})  {start} ~ {end}  共 {len(items)} 条 ==")
+    if window_meta is not None:
+        tail = "  ⚠ 交易日历获取失败，上一交易日为估算值" if window_meta.get("estimated") else ""
+        print(f"   口径：当日 + 上一交易日（上一交易日 {window_meta['previous_trading_day']}）{tail}")
     for it in items:
         if it["hk_disclosure"]:
             flag = "H股披露"
@@ -400,7 +428,8 @@ def main():
         print("\n-- 无公告 --")
         for w in empty_notes:
             print(f"  * {w}")
-        print("  结论：直接回复「当日无公告」并结束，不再做进一步分析。")
+        conclusion = "当日无公告" if start == end else f"{start} ~ {end} 内无公告"
+        print(f"  结论：直接回复「{conclusion}」并结束，不再做进一步分析。")
     if warnings:
         print("\n-- 提示 --")
         for w in warnings:
