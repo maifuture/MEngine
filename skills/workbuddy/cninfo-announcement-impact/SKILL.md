@@ -14,6 +14,25 @@ version: 1.2.1
 2. **财报类文件不在这里评。** 业绩预告、业绩快报、季度/半年度/年度报告及其摘要，一律转交 `earnings-report-deepdive`。
 3. **无公告就说无公告，但反证不能省。** 当日 0 条先反证接口是否正常，确认后一句话结束——不扩窗、不取行情、不给级、不补分析。
 
+## 依赖自检与安装（首次使用先做一次）
+
+PDF 文本提取需要 `pypdf`。首次使用、或运行中出现「pypdf 未安装」告警时，先自检：
+
+```bash
+python3 <skill_dir>/scripts/check_env.py
+```
+
+自检**只诊断、不安装**：报告解释器路径、版本、是否虚拟环境、PEP 668（系统托管）状态、依赖是否就位，并给出**一条**适配当前环境的安装命令——虚拟环境内直装 / `--user` 安装 / 新建虚拟环境 / 先补 pip，四种情况各自不同。
+
+**安装必须经用户授权。** 把自检结果转述给用户时讲清三件事：缺什么、要执行哪条命令、装到哪个解释器或环境。等用户明确同意再执行。`pip install` 会改动用户的 Python 环境，未经同意不要运行。
+
+| 用户选择 | 怎么做 |
+|---|---|
+| 同意安装 | 执行自检建议的那条命令 → 复验 `python3 <skill_dir>/scripts/check_env.py --quiet`（退出码 0 即就位）→ 再跑正事 |
+| 拒绝安装 | 只下载 PDF、不提取文本，并明确告知「缺少 PDF 解析依赖，读不到原文」。本 skill 的评级建立在原文数字与行情反应之上，**此时不给评级、不出报告**，不要退化成只读标题猜方向 |
+
+`--json` 输出可直接解析：`ok` 为假时取 `advice` 字段的命令；`--any` 用于「任一可用即可」的依赖组合。
+
 ## 执行流程
 
 > **命令约定（跨平台）**
@@ -51,7 +70,7 @@ python3 <skill_dir>/scripts/cninfo_fetch.py --symbol 688825 --days 30 --out ./cn
 - 指定更窄区间：`--start 2026-10-01 --end 2026-10-24`（区间同样不得超过一个月）。
 - 只想看清单不下载：`--no-download`。
 - 脚本会把 PDF 与提取出的 `.txt` 落到输出目录，并生成 `announcements.json`。
-- 若报 `pypdf 未安装`：`python3 -m pip install pypdf`（Windows 用 `python -m pip install pypdf`）。
+- 若报 `pypdf 未安装`：见上文「依赖自检与安装」，先自检、经用户授权再装。
 
 脚本会自动给出四类提示，务必读：① 无实质性公告 ② 混入 H 股/港股例行披露 ③ 存在非交易日披露 ④ 文本过少疑似扫描件。
 
@@ -191,8 +210,8 @@ python3 <skill_dir>/scripts/quote_snapshot.py --symbol 688825 --kline 15 --align
 
 | 项 | 说明 |
 |---|---|
-| 解释器 | Python 3.9+。macOS／Linux 用 `python3`，Windows 用 `python` 或 `py -3`；建议用装了 pypdf 的虚拟环境 |
-| 依赖 | 两个脚本仅用标准库；PDF 文本提取需 pypdf（`python3 -m pip install pypdf`） |
+| 解释器 | Python 3.9+。macOS／Linux 用 `python3`，Windows 用 `python` 或 `py -3` |
+| 依赖 | 三个脚本仅用标准库；PDF 文本提取需 pypdf，安装见上文「依赖自检与安装」 |
 | 联动 | 财报类文件转交 `earnings-report-deepdive`（与本 skill 同级安装）；两者窗口口径互补，不要互相扩窗 |
 | 接口细节 | 见 [references/cninfo-api.md](references/cninfo-api.md)，仅在接口异常或需扩展检索时读 |
 | 限流 | 免费行情接口会限流，脚本自动切腾讯备用源；多标的时逐个串行、间隔 1 秒 |

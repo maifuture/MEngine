@@ -45,6 +45,25 @@ description: 业绩披露核查与财报深研。只处理四类文件——业�
 - 拿不到的数据明确标注口径与局限，不静默补齐。
 - 全程简体中文。
 
+## 依赖自检与安装（首次使用先做一次）
+
+财报全文提取需要 `pypdf`。首次使用、或运行中出现「pypdf 未安装」告警时，先自检：
+
+```bash
+python3 <skill_dir>/scripts/check_env.py
+```
+
+自检**只诊断、不安装**：报告解释器路径、版本、是否虚拟环境、PEP 668（系统托管）状态、依赖是否就位，并给出**一条**适配当前环境的安装命令——虚拟环境内直装 / `--user` 安装 / 新建虚拟环境 / 先补 pip，四种情况各自不同。
+
+**安装必须经用户授权。** 把自检结果转述给用户时讲清三件事：缺什么、要执行哪条命令、装到哪个解释器或环境。等用户明确同意再执行。`pip install` 会改动用户的 Python 环境，未经同意不要运行。
+
+| 用户选择 | 怎么做 |
+|---|---|
+| 同意安装 | 执行自检建议的那条命令 → 复验 `python3 <skill_dir>/scripts/check_env.py --quiet`（退出码 0 即就位）→ 再跑正事 |
+| 拒绝安装 | 只下载 PDF、不提取文本，并明确告知「缺少 PDF 解析依赖，读不到财报原文」。本 skill 的一切拆解都要求原文数字，**此时停止分析、不给评级、不出报告**，不要靠标题和记忆拼一篇出来 |
+
+`--json` 输出可直接解析：`ok` 为假时取 `advice` 字段的命令；`--any` 用于「任一可用即可」的依赖组合。
+
 ## 工作流
 
 > **命令约定（跨平台）**
@@ -308,8 +327,9 @@ A 分支复制 `assets/report-template.html`，写全 11 节，**删掉用不上
 |---|---|---|
 | `scripts/fetch.py` | 公告列表、PDF 下载、文本提取、接口自证 | `--keyword` / `--symbol`、`--days`（当日模式）、`--latest`（最新模式）、`--start/--end`、`--no-download`、`--out`、`--verify-market` |
 | `scripts/quote.py` | 行情快照与日 K（仅 A 分支） | `--symbol`、`--kline`、`--align` |
+| `scripts/check_env.py` | 环境自检（只诊断不安装） | `--json`、`--quiet` |
 
-解释器：Python 3.9+。macOS／Linux 用 `python3`，Windows 用 `python` 或 `py -3`；建议用装了 pypdf 的虚拟环境（`python3 -m pip install pypdf`）。脚本仅依赖标准库。
+解释器：Python 3.9+。macOS／Linux 用 `python3`，Windows 用 `python` 或 `py -3`。脚本仅依赖标准库，PDF 文本提取需 pypdf，安装见上文「依赖自检与安装」。
 
 `--out` 默认是当前目录下的 `cninfo_out/`。**在工作目录里运行**，或显式指定 `--out <工作目录>/cninfo_out`，不要把 PDF 和 JSON 落进 skill 自己的目录。
 

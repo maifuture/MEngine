@@ -28,6 +28,25 @@ agent_created: true
 - 若用户明确要操作节奏：追加 `trade-plan.md`
 - 产出 HTML 前：`html-report-style.md`（本技能的 `assets/report-shell.html` 已内化其核心约束，可直接复用骨架）
 
+## 依赖自检与安装（首次使用先做一次）
+
+定期报告的全文与收入构成提取需要 PDF 解析库：**`pdfplumber` 首选**（表格错行少），缺失时回退 `pypdf`，两者都缺则读不出原文。首次使用、或运行中出现相关告警时，先自检：
+
+```bash
+python3 <skill_dir>/scripts/check_env.py pdfplumber pypdf --any
+```
+
+`--any` 表示两者任一可用即算通过。自检**只诊断、不安装**：报告解释器路径、版本、是否虚拟环境、PEP 668（系统托管）状态、依赖是否就位，并给出**一条**适配当前环境的安装命令——虚拟环境内直装 / `--user` 安装 / 新建虚拟环境 / 先补 pip，四种情况各自不同。
+
+**安装必须经用户授权。** 把自检结果转述给用户时讲清三件事：缺什么、要执行哪条命令、装到哪个解释器或环境。等用户明确同意再执行。`pip install` 会改动用户的 Python 环境，未经同意不要运行。
+
+| 用户选择 | 怎么做 |
+|---|---|
+| 同意安装 | 执行自检建议的那条命令 → 复验 `python3 <skill_dir>/scripts/check_env.py pdfplumber pypdf --any --quiet`（退出码 0 即就位）→ 再跑正事 |
+| 拒绝安装 | 报告已有 PDF 但读不出全文，明确说明「收入构成与财务指标无法提取」。**不要**靠标题、记忆或二手数据编收入结构，也不要跳过第六章出处照常收尾 |
+
+`--json` 输出可直接解析：`ok` 为假时取 `advice` 字段的命令。
+
 ## 六步流程
 
 > **命令约定（跨平台）**
@@ -165,7 +184,7 @@ stock-research-pipeline/
     └── report-shell.html     # 单文件内联样式骨架，已含原文出处区块模板
 ```
 
-依赖：`pip install pdfplumber`（仅 PDF 解析需要，缺失时自动回退 `pypdf`）。三个脚本只用标准库 + PDF 库，不需要 requests。
+依赖：PDF 解析需 `pdfplumber`（首选）或 `pypdf`（回退），安装见上文「依赖自检与安装」。四个脚本只用标准库 + PDF 库，不需要 requests。
 
 `reports/sources.json` 是财报外链的来源（`cninfo_periodic.py fetch` 自动写）；缺它时第九章的财报行会降级为纯文本并标红「未取到原始链接」，不会生成死链。
 
