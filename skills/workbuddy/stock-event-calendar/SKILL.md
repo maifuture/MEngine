@@ -10,12 +10,11 @@ description: 读取巨潮资讯网（cninfo）「交易信息 → 公司日历�
 
 ## 用法
 
-```bash
-PY=/Users/alex/.workbuddy/binaries/python/envs/default/bin/python
-S=~/.workbuddy/skills/stock-event-calendar/scripts/company_calendar.py
+> **命令约定（跨平台）**：`python3` 指本机 Python 3 解释器，**Windows** 上改用 `python` 或 `py -3`；`<skill_dir>` 指本 skill 的 base 目录（加载时会给出），Windows 上路径分隔符用 `\`。脚本只用标准库，无需装依赖。
 
-$PY $S --symbol 长鑫科技
-$PY $S --symbol 688825
+```bash
+python3 <skill_dir>/scripts/company_calendar.py --symbol 长鑫科技
+python3 <skill_dir>/scripts/company_calendar.py --symbol 688825
 ```
 
 ## 标的选取规则

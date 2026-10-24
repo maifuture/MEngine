@@ -16,6 +16,13 @@ version: 1.2.1
 
 ## 执行流程
 
+> **命令约定（跨平台）**
+>
+> - `python3` 指本机 Python 3 解释器。**Windows** 上改用 `python` 或 `py -3`；若本机有专用虚拟环境，换成该环境解释器的绝对路径。
+> - `<skill_dir>` 指本 skill 的 base 目录（加载时会给出）。Windows 上路径分隔符用 `\`。
+> - 命令在**工作目录**执行，输出落在当前目录，不要写进 skill 自己的目录。
+> - Windows 终端若中文乱码，先设 `set PYTHONIOENCODING=utf-8`（PowerShell：`$env:PYTHONIOENCODING="utf-8"`）再跑。
+
 ### 0. 定口径：默认当日，最多一个月
 
 | 模式 | 触发条件 | 检索窗口 | 分析对象 |
@@ -33,20 +40,18 @@ version: 1.2.1
 #### 1.1 检索
 
 ```bash
-PY=/Users/alex/.workbuddy/binaries/python/envs/default/bin/python
-
 # 当日模式（默认）
-$PY scripts/cninfo_fetch.py --symbol 688825 --days 1 --out ./cninfo_688825
+python3 <skill_dir>/scripts/cninfo_fetch.py --symbol 688825 --days 1 --out ./cninfo_688825
 
 # 近期模式（用户明确要近期公告时，一个月窗口）
-$PY scripts/cninfo_fetch.py --symbol 688825 --days 30 --out ./cninfo_688825
+python3 <skill_dir>/scripts/cninfo_fetch.py --symbol 688825 --days 30 --out ./cninfo_688825
 ```
 
 - 只有名称没有代码时用 `--keyword 长鑫`，脚本会打印全部命中项，**多个同名标的手动确认 code**，不要默认取第一条。
 - 指定更窄区间：`--start 2026-10-01 --end 2026-10-24`（区间同样不得超过一个月）。
 - 只想看清单不下载：`--no-download`。
 - 脚本会把 PDF 与提取出的 `.txt` 落到输出目录，并生成 `announcements.json`。
-- 若报 `pypdf 未安装`：`$PY -m pip install pypdf`（该 venv 通常已装）。
+- 若报 `pypdf 未安装`：`python3 -m pip install pypdf`（Windows 用 `python -m pip install pypdf`）。
 
 脚本会自动给出四类提示，务必读：① 无实质性公告 ② 混入 H 股/港股例行披露 ③ 存在非交易日披露 ④ 文本过少疑似扫描件。
 
@@ -72,19 +77,13 @@ $PY scripts/cninfo_fetch.py --symbol 688825 --days 30 --out ./cninfo_688825
 **情况 B：自检失败或全市场亦为 0 条** → 手动补跑一次反证，不要直接下结论：
 
 ```bash
-$PY - <<'EOF'
-import urllib.parse, urllib.request, json, datetime as dt
-d = dt.date.fromisoformat("2026-10-24")  # 换成待查日期
-body = urllib.parse.urlencode({"pageNum":1,"pageSize":30,"column":"sse","tabName":"fulltext",
-    "stock":"","seDate":f"{d}~{d}","isHLtitle":"true"}).encode()
-req = urllib.request.Request("https://www.cninfo.com.cn/new/hisAnnouncement/query", data=body,
-    headers={"User-Agent":"Mozilla/5.0 Chrome/120.0","Referer":"https://www.cninfo.com.cn/",
-             "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"})
-print("全市场当日:", json.loads(urllib.request.urlopen(req, timeout=30).read())["totalRecordNum"])
-EOF
+# 查询全市场某日公告总条数；省略日期则为今天
+python3 <skill_dir>/scripts/cninfo_fetch.py --verify-market 2026-10-24
 ```
 
-补跑后仍失败、或全市场确实为 0 条 → 结论只能写成「未能从巨潮确认今日公告，疑似接口异常或非交易日」，**不断言公司没披露**，到此为止，不再重试第三次、不再换标的试探。
+输出 `全市场 2026-10-24 共 N 条`，并给退出码：`0` 接口正常且有公告、`1` 接口正常但全市场 0 条（疑似非交易日）、`2` 请求失败或日期非法。
+
+补跑后仍失败（退出码 2）、或全市场确实为 0 条（退出码 1） → 结论只能写成「未能从巨潮确认今日公告，疑似接口异常或非交易日」，**不断言公司没披露**，到此为止，不再重试第三次、不再换标的试探。
 
 反证只判断接口是否正常：**不写进结论、不参与评级、不作为"公司信息披露平稳"之类的判断依据。**
 
@@ -136,7 +135,7 @@ EOF
 ### 4. 取行情基准，并做公告日对齐
 
 ```bash
-$PY scripts/quote_snapshot.py --symbol 688825 --kline 15 --align 2026-10-24
+python3 <skill_dir>/scripts/quote_snapshot.py --symbol 688825 --kline 15 --align 2026-10-24
 ```
 
 必须拿到的四件事：
@@ -192,9 +191,9 @@ $PY scripts/quote_snapshot.py --symbol 688825 --kline 15 --align 2026-10-24
 
 | 项 | 说明 |
 |---|---|
-| 解释器 | `/Users/alex/.workbuddy/binaries/python/envs/default/bin/python`（含 pypdf） |
-| 依赖 | 两个脚本仅用标准库；PDF 文本提取需 pypdf |
-| 联动 | 财报类文件转交 `earnings-report-deepdive`（同目录 `~/.workbuddy/skills/` 下）；两者窗口口径互补，不要互相扩窗 |
+| 解释器 | Python 3.9+。macOS／Linux 用 `python3`，Windows 用 `python` 或 `py -3`；建议用装了 pypdf 的虚拟环境 |
+| 依赖 | 两个脚本仅用标准库；PDF 文本提取需 pypdf（`python3 -m pip install pypdf`） |
+| 联动 | 财报类文件转交 `earnings-report-deepdive`（与本 skill 同级安装）；两者窗口口径互补，不要互相扩窗 |
 | 接口细节 | 见 [references/cninfo-api.md](references/cninfo-api.md)，仅在接口异常或需扩展检索时读 |
 | 限流 | 免费行情接口会限流，脚本自动切腾讯备用源；多标的时逐个串行、间隔 1 秒 |
 

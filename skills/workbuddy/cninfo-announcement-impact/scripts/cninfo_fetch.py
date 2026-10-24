@@ -181,6 +181,35 @@ def market_probe(day):
         return None, str(exc)
 
 
+def verify_market(date_arg, today):
+    """接口自证：只回答"全市场某日有多少条公告"，不涉及任何标的、不产生分析动作。
+
+    用途：某标的当日 0 条时，把"公司确无披露"与"接口没打通／代码错配"区分开。
+
+    退出码：0 = 接口正常且全市场有公告；1 = 接口通但全市场 0 条（疑似非交易日）；
+            2 = 请求失败或日期非法（无法确认）。
+    """
+    day = today.isoformat() if date_arg in (None, "", "today") else date_arg
+    try:
+        dt.date.fromisoformat(day)
+    except ValueError:
+        print(f"日期格式不对：{day}，应为 YYYY-MM-DD")
+        return 2
+
+    n, err = market_probe(day)
+    if n is None:
+        print(f"接口自检失败：未能取到 {day} 的全市场公告数（{err or '无返回'}）")
+        print("结论：无法确认接口是否正常，不要断言公司无披露。")
+        return 2
+
+    print(f"接口自检：全市场 {day} 共 {n} 条")
+    if n:
+        print("反证通过，接口正常。若某标的当日 0 条，可判定其确无披露。")
+        return 0
+    print("反证未通过：全市场亦为 0 条，大概率是非交易日或接口异常，不要断言公司无披露。")
+    return 1
+
+
 def main():
     ap = argparse.ArgumentParser(description="巨潮资讯网公告抓取")
     ap.add_argument("--keyword", help="股票名称或简称关键词")
@@ -190,12 +219,19 @@ def main():
     ap.add_argument("--end", help="截止日 YYYY-MM-DD")
     ap.add_argument("--out", default="./cninfo_out", help="输出目录")
     ap.add_argument("--no-download", action="store_true", help="只列公告，不下载 PDF")
+    ap.add_argument(
+        "--verify-market", nargs="?", const="today", metavar="DATE",
+        help="只做接口自证：打印全市场某日公告总条数后退出，不需要 --keyword/--symbol。DATE 省略则为今天",
+    )
     args = ap.parse_args()
+
+    today = dt.datetime.now(CST).date()
+
+    if args.verify_market:
+        return verify_market(args.verify_market, today)
 
     if not args.keyword and not args.symbol:
         ap.error("需要 --keyword 或 --symbol")
-
-    today = dt.datetime.now(CST).date()
     if args.start and args.end:
         start, end = args.start, args.end
     else:
@@ -359,4 +395,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

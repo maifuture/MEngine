@@ -190,7 +190,7 @@ def main():
 
     text, npages = pdf_text(pdf_path)
     txt_path = os.path.splitext(pdf_path)[0] + ".txt"
-    with open(txt_path, "w") as f:
+    with open(txt_path, "w", encoding="utf-8") as f:
         f.write(text)
     print(f"[i] 全文 {npages} 页已转文本 -> {txt_path}")
 

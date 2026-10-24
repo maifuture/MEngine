@@ -155,7 +155,7 @@ def save(rec, outdir, tag=""):
     url, title, body = fetch_body(rec["id"], rec["kind"])
     os.makedirs(outdir, exist_ok=True)
     fn = os.path.join(outdir, f"{tag}{rec['date']}_{rec['org'][:6]}_{rec['id']}.txt")
-    with open(fn, "w") as f:
+    with open(fn, "w", encoding="utf-8") as f:
         f.write(f"标题：{rec['title'] or title}\n机构：{rec['org']}\n"
                 f"日期：{rec['date']}\n类别：{rec['cat']}\n来源：{url}\n\n{body}\n")
     return fn, len(body)

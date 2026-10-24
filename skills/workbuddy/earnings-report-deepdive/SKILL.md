@@ -47,6 +47,13 @@ description: 业绩披露核查与财报深研。只处理四类文件——业�
 
 ## 工作流
 
+> **命令约定（跨平台）**
+>
+> - `python3` 指本机 Python 3 解释器。**Windows** 上改用 `python` 或 `py -3`；若本机有专用虚拟环境，换成该环境解释器的绝对路径。
+> - `<skill_dir>` 指本 skill 的 base 目录（加载时会给出）。Windows 上路径分隔符用 `\`。
+> - 命令在**工作目录**执行，输出落在当前目录，不要写进 skill 自己的目录。
+> - Windows 终端若中文乱码，先设 `set PYTHONIOENCODING=utf-8`（PowerShell：`$env:PYTHONIOENCODING="utf-8"`）再跑。
+
 ### 第 0 步 定时点、定模式
 
 先确认今天几号、星期几、是否交易日。
@@ -60,13 +67,11 @@ description: 业绩披露核查与财报深研。只处理四类文件——业�
 **1.1 检索**
 
 ```bash
-PY=/Users/alex/.workbuddy/binaries/python/envs/default/bin/python
-
 # 当日模式（默认）
-$PY scripts/fetch.py --keyword 纳芯微 --days 1 --no-download
+python3 <skill_dir>/scripts/fetch.py --keyword 纳芯微 --days 1 --no-download
 
 # 最新模式（用户明确要最新数据时）
-$PY scripts/fetch.py --symbol 688052 --latest
+python3 <skill_dir>/scripts/fetch.py --symbol 688052 --latest
 ```
 
 `--latest` 会从 10 天窗口起逐步扩到 30/60/120/240/400 天，命中即停，只回最近一个披露日的全部文件（全文优先、摘要并列），并打印 `⚠ 非当日披露，距今天 N 天`。看到这行警告，就必须在回答里转述它。
@@ -78,18 +83,13 @@ $PY scripts/fetch.py --symbol 688052 --latest
 否则无法排除接口延迟或市场代码错配：
 
 ```bash
-$PY - <<'EOF'
-import requests
-H={"User-Agent":"Mozilla/5.0 Chrome/120.0","Referer":"https://www.cninfo.com.cn/",
-   "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"}
-r=requests.post("https://www.cninfo.com.cn/new/hisAnnouncement/query",
-  data={"pageNum":1,"pageSize":30,"column":"sse","tabName":"fulltext","stock":"",
-        "seDate":"2026-10-24~2026-10-24","isHLtitle":"true"},headers=H,timeout=30)
-j=r.json(); print("全市场当日:", j.get("totalRecordNum"))
-EOF
+# 查询全市场某日公告总条数；省略日期则为今天
+python3 <skill_dir>/scripts/fetch.py --verify-market 2026-10-24
 ```
 
-全市场当日有数百至数千条 → 接口正常，公司确实无披露。返回 0 → 换 http 重试或改用其他日期探活。
+输出 `全市场 2026-10-24 共 N 条`，并给退出码：`0` 接口正常且有公告、`1` 接口正常但全市场 0 条（疑似非交易日）、`2` 请求失败或日期非法。
+
+全市场当日有数百至数千条 → 接口正常，公司确实无披露。返回 0（退出码 1）→ 换 http 重试或改用其他日期探活。
 
 最新模式 0 条（400 天内都没有）时的反证方式不同：确认 `orgId` 没错配（同名的港股/新三板标的会让列表为空），并确认窗口内公告总数正常。这种情况多半是新股或代码解析错，写清「回溯 400 天未见业绩类文件，需人工核对」，不要说成「今日无披露」。
 
@@ -239,7 +239,7 @@ B 分支到此为止。具体地说，以下动作**一律不做**：
 ### 第 4 步 取行情（仅 A 分支）
 
 ```bash
-$PY scripts/quote.py --symbol 688052 --kline 40
+python3 <skill_dir>/scripts/quote.py --symbol 688052 --kline 40
 ```
 
 必须拿到：最新收盘、总市值、PE(动)/PB、近 40 日高低点、区间涨跌幅。
@@ -302,14 +302,14 @@ A 分支复制 `assets/report-template.html`，写全 11 节，**删掉用不上
 
 ## 脚本
 
-脚本路径均相对于本 skill 的 base 目录（加载时会给出）。首次使用先确认解释器可用。
+脚本路径均相对于本 skill 的 base 目录（`<skill_dir>`，加载时会给出）。首次使用先确认解释器可用。
 
 | 脚本 | 用途 | 关键参数 |
 |---|---|---|
-| `scripts/fetch.py` | 公告列表、PDF 下载、文本提取 | `--keyword` / `--symbol`、`--days`（当日模式）、`--latest`（最新模式）、`--start/--end`、`--no-download`、`--out` |
+| `scripts/fetch.py` | 公告列表、PDF 下载、文本提取、接口自证 | `--keyword` / `--symbol`、`--days`（当日模式）、`--latest`（最新模式）、`--start/--end`、`--no-download`、`--out`、`--verify-market` |
 | `scripts/quote.py` | 行情快照与日 K（仅 A 分支） | `--symbol`、`--kline`、`--align` |
 
-解释器：`/Users/alex/.workbuddy/binaries/python/envs/default/bin/python`（已装 pypdf）。脚本仅依赖标准库。
+解释器：Python 3.9+。macOS／Linux 用 `python3`，Windows 用 `python` 或 `py -3`；建议用装了 pypdf 的虚拟环境（`python3 -m pip install pypdf`）。脚本仅依赖标准库。
 
 `--out` 默认是当前目录下的 `cninfo_out/`。**在工作目录里运行**，或显式指定 `--out <工作目录>/cninfo_out`，不要把 PDF 和 JSON 落进 skill 自己的目录。
 
