@@ -1,23 +1,31 @@
 # DSH Scriptor · Webnovel Writer v8
 
-**[🌐 产品主页](https://lingfengqaq.github.io/webnovel-writer/) · [📖 新手教程](https://lingfengqaq.github.io/webnovel-writer/docs/beginner.html) · [下载正式版](https://github.com/lingfengQAQ/webnovel-writer/releases/latest)**
+**[🌐 产品主页](https://lingfengqaq.github.io/webnovel-writer/) · [📖 新手教程](https://lingfengqaq.github.io/webnovel-writer/docs/beginner.html)**
 
-> Scriptor 8.4.0 正式版配套 **DSH 0.2.2-rc.1**，三个功能插件与完整版均为 8.4.0。8.3.2 仍只配套 DSH 0.2.1-rc.3。旧版升级先备份，参阅安装与升级说明。
+> 本目录是 **Scriptor 8.3.2-upgrade**：把已发布的 8.3.2 接到 **DSH 0.2.2-rc.1** 的源码升级。它没有发布到 npm。已发布的 8.3.2 仍只配套 DSH 0.2.1-rc.3。
 
 基于 [DeepSeek Harness](https://www.deepseek.com/harness/) 的长篇小说写作工作台。把构想、设定、大纲、写章、审读、修改、定稿、记忆与导出放进一个能够暂停和继续的工作流程，作品以本地文件保存。
 
-**正式版：8.4.0。** Windows 首发；重要作品使用前请备份。模型服务由你配置，调用可能产生费用。
+**源码升级：8.3.2-upgrade。** 重要作品使用前请备份。模型服务由你配置，调用可能产生费用。
 
 [![DSH Scriptor 项目介绍视频](docs/user/images/video-poster.png)](docs/user/media/intro.mp4)
 
 > 📹 **2 分钟视频快速了解 DSH Scriptor**：[点击播放或下载视频 (1080P/MP4)](docs/user/media/intro.mp4) · [字幕文件](docs/user/media/intro.srt)  
 > 视频演示了核心设计理念、全流程写作闭环、断更无损恢复以及书稿编辑器的交互操作。
 
-DSH Scriptor is a local-first fiction writing workspace for DeepSeek Harness. Version 8.4.0 runs on DeepSeek Harness 0.2.2-rc.1. Version 8.3.2 remains the release for 0.2.1-rc.3. Runtime prompts and skills are included; model services are configured by the user.
+DSH Scriptor is a local-first fiction writing workspace for DeepSeek Harness. This tree, 8.3.2-upgrade, runs on DeepSeek Harness 0.2.2-rc.1. The published 8.3.2 remains the release for 0.2.1-rc.3. Runtime prompts and skills are included; model services are configured by the user.
 
-**8.4.0 升级须知：先升级 DSH 至 0.2.2-rc.1，再更新已用组件。** 仍使用 DSH 0.2.1-rc.3 时，请保留 Scriptor 8.3.2；DSH 0.2.1-rc.2 保留 8.3.1；DSH 0.2.0-rc.2 继续配套 Scriptor 8.2.2。重启后，新建对话并选择“写作模式”。AI 写作、润色、续写与审读在此模式下使用；旧书打开原工作区继续，旧对话不会自动迁移。尚未配置章节篇幅时，再补充并确认契约。先备份并保留原契约内容，再约定目标汉字数与宽松上下限。未配置的旧书仍可继续使用，但不会启用篇幅范围核对。完整步骤和可复制请求见 [旧项目契约更新](docs/user/upgrade-backup.md#旧项目需要更新作品契约)。
+## 这次升级做什么
 
-本版把写作插件接到 DSH 0.2.2-rc.1 的工具执行器。写作流程、技能和书仓格式沿用 8.3.2。写作、检索增强、完整版和鲸鱼娘同批发行。书稿编辑器继续支持选区改写、行内建议和逐条采纳；采纳后仍需保存。详见 [新编辑器图文教程](docs/user/editor.md)。
+已发布的 Scriptor 8.3.2 在 `engines.dsh` 中声明精确版本 `0.2.1-rc.3`。DSH 安装和启动时只接受这个声明，所以 8.3.2 不能装进已发布的 DSH 0.2.2-rc.1。
+
+8.3.2-upgrade 只解决这个配套问题：
+
+- 宿主声明、依赖和基线钉到 DSH **0.2.2-rc.1** 与 Cordis **4.1.0**。
+- 写作写入和写作子代理改接 0.2.2-rc.1 的工具执行器。
+- 写作流程、技能、书仓格式和会话格式沿用 8.3.2。书稿编辑器的选区改写、行内建议和逐条采纳不变，采纳后仍需保存。
+
+仍使用 DSH 0.2.1-rc.3 时，继续使用已发布的 Scriptor 8.3.2。DSH 0.2.1-rc.2 保留 8.3.1；DSH 0.2.0-rc.2 继续配套 8.2.2。装上本升级后，新建对话并选择“写作模式”；旧书打开原工作区继续，旧对话不会自动迁移。详见 [新编辑器图文教程](docs/user/editor.md)。
 
 ## 创作工作流程
 
@@ -62,9 +70,9 @@ Scriptor 将长篇小说的生产拆分为**作品设计**与**章节闭环**两
 | 产品线 | 运行环境 | 入口 |
 | --- | --- | --- |
 | v6 | Claude Code 插件 | [v6 文档与安装](https://github.com/lingfengQAQ/webnovel-writer/tree/master) |
-| v8（本分支） | DeepSeek Harness 工作台 | [下载正式版](https://github.com/lingfengQAQ/webnovel-writer/releases/tag/scriptor-v8.4.0) · [安装教程](docs/user/install.md) |
+| v8（本目录） | DeepSeek Harness 0.2.2-rc.1 | [从源码安装](#从源码安装到-dsh) |
 
-两个版本安装方式不同。当前没有经过验证的 v6/v7 书仓直接迁移方案。`v8` 是产品线名称，`8.4.0` 是工作台安装包版本。
+两个版本安装方式不同。当前没有经过验证的 v6/v7 书仓直接迁移方案。`v8` 是产品线名称，`8.3.2-upgrade` 是这份源码的安装包版本。
 
 ## 能做什么
 
@@ -78,23 +86,29 @@ Scriptor 将长篇小说的生产拆分为**作品设计**与**章节闭环**两
 
 主包包含 11 个运行技能和 8 个脚本入口。嵌入提供方是独立可选包，基础写作无需先配置向量服务。模型创作质量、长篇一致性和费用会随模型与操作方式变化，不承诺无人值守完成整本书。
 
-## 开始使用
+## 从源码安装到 DSH
 
-1. 安装配套的 **DSH 0.2.2-rc.1** 桌面端，打开侧栏 **插件 → 添加插件**。
-2. 输入 `@linfengqaqtat/dsh-scriptor@8.4.0`，核对预览并安装，按提示应用变更。
-3. 配置聊天模型与凭据，新建对话并选择 **写作模式**，打开作品工作区，按 [第一本书与第一章](docs/user/first-book.md) 开始。
+先安装 **DSH 0.2.2-rc.1**，并确认 `dsh --version` 打印 `0.2.2-rc.1`。本机还需要 Node.js `^22.19.0` 或 `^24.0.0`，以及 pnpm 11.27.1。源码和 tarball 的路径不要包含空格。
 
-逐步说明见 [安装教程](docs/user/install.md) 和 [新手教程](docs/user/beginner.md)。正式版发布到 npm latest，教程使用精确版本便于核对宿主。
+```sh
+git clone https://github.com/maifuture/MEngine.git
+cd MEngine/deepseek-harness/packages/webnovel-writer
+pnpm install
+pnpm --filter @linfengqaqtat/dsh-scriptor build
+pnpm --filter @linfengqaqtat/dsh-scriptor pack --pack-destination .
+```
 
-| 可选插件 | 安装标识 | 用途 |
-| --- | --- | --- |
-| 检索增强 | `@linfengqaqtat/dsh-scriptor-retrieval@8.4.0` | 嵌入、场景识别、重排，分别配置和启用 |
-| 鲸鱼娘 | `@linfengqaqtat/dsh-scriptor-companion@8.4.0` | 窗口内陪伴与会话状态反馈，不调用模型 |
-| 完整版 | `@linfengqaqtat/dsh-scriptor-full@8.4.0` | 聚合写作和检索，不含桌宠；与单独安装二选一 |
+当前目录会得到 `linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz`。用已安装的 DSH 把它装进一个来自 Web 模板的 profile：
 
-旧包迁移与备份见 [升级说明](docs/user/upgrade-backup.md)，不要同时启用旧检索包和新检索包。
+```sh
+dsh --profile scriptor --from-default-profile web --dump-config
+dsh plugin --profile scriptor add "$PWD/linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz"
+dsh --profile scriptor --dump-config
+```
 
-本次四包统一发行 8.4.0；检索增强与鲸鱼娘同步到同一版本，没有改检索算法或桌宠行为。只更新你实际使用的组件；不用检索或桌宠就无需安装它们。已验证的推荐组合为同版本，full 的主包与检索由依赖一起更新，桌宠始终独立。
+后一次 `--dump-config` 应包含 `preset-scriptor`，名称是「写作模式」。然后启动这个 profile，配置聊天模型，新建对话并选择 **写作模式**。桌面端自己的 `desktop` profile 不要套用 `--from-default-profile web`。
+
+这个 tarball 没有发布到 npm，插件页里搜不到 `8.3.2-upgrade`。已发布的 8.3.2 只能留在 DSH 0.2.1-rc.3 上。检索增强和桌宠在这棵源码里版本相同，但基础写作只需要上面的主包。旧包迁移见 [升级说明](docs/user/upgrade-backup.md)。后续写作步骤见 [第一本书与第一章](docs/user/first-book.md)。
 
 ## 文档
 

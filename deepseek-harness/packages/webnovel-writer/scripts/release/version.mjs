@@ -8,7 +8,7 @@ export function releaseVersion(directory = root, tag) {
   const bundle = JSON.parse(fs.readFileSync(path.join(directory, 'packages/bundle/package.json'), 'utf8'))
   const workspace = JSON.parse(fs.readFileSync(path.join(directory, 'package.json'), 'utf8'))
   const meta = JSON.parse(fs.readFileSync(path.join(directory, 'packages/meta/package.json'), 'utf8'))
-  assert.match(bundle.version, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/)
+  assert.match(bundle.version, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+)?$/)
   assert.equal(workspace.version, bundle.version, 'Workspace and main release version must agree')
   assert.equal(meta.version, bundle.version, 'Full and main release version must agree')
   for (const name of ['embedding-provider', 'companion']) {
