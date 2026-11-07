@@ -98,7 +98,21 @@ pnpm --filter @linfengqaqtat/dsh-scriptor build
 pnpm --filter @linfengqaqtat/dsh-scriptor pack --pack-destination .
 ```
 
-当前目录会得到 `linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz`。用已安装的 DSH 把它装进一个来自 Web 模板的 profile：
+当前目录会得到 `linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz`。记下它的完整路径，例如 `~/MEngine/deepseek-harness/packages/webnovel-writer/linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz`。路径不要包含空格。
+
+### DSH Desktop
+
+1. 打开 DSH Desktop **0.2.2-rc.1**，在侧栏进入 **插件 → 添加插件**。
+2. 在「输入插件的包名、GitHub 仓库地址或本地目录路径」的输入框里，填入上一步生成的 tarball **完整路径**，例如：
+   `~/MEngine/deepseek-harness/packages/webnovel-writer/linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz`
+3. 点击 **安装**，按提示启用或重启。
+4. 新建对话并选择 **写作模式**。
+
+不要在这个输入框里填写包名来安装本升级。`8.3.2-upgrade` 没有发布到 npm，插件市场搜不到它。已发布的 8.3.2 只能留在 DSH 0.2.1-rc.3 上。
+
+### 命令行
+
+也可以把同一个 tarball 装进一个来自 Web 模板的 profile。桌面端自己的 `desktop` profile 不要套用 `--from-default-profile web`。
 
 ```sh
 dsh --profile scriptor --from-default-profile web --dump-config
@@ -106,9 +120,9 @@ dsh plugin --profile scriptor add "$PWD/linfengqaqtat-dsh-scriptor-8.3.2-upgrade
 dsh --profile scriptor --dump-config
 ```
 
-后一次 `--dump-config` 应包含 `preset-scriptor`，名称是「写作模式」。然后启动这个 profile，配置聊天模型，新建对话并选择 **写作模式**。桌面端自己的 `desktop` profile 不要套用 `--from-default-profile web`。
+后一次 `--dump-config` 应包含 `preset-scriptor`，名称是「写作模式」。然后启动这个 profile，配置聊天模型，新建对话并选择 **写作模式**。
 
-这个 tarball 没有发布到 npm，插件页里搜不到 `8.3.2-upgrade`。已发布的 8.3.2 只能留在 DSH 0.2.1-rc.3 上。检索增强和桌宠在这棵源码里版本相同，但基础写作只需要上面的主包。旧包迁移见 [升级说明](docs/user/upgrade-backup.md)。后续写作步骤见 [第一本书与第一章](docs/user/first-book.md)。
+检索增强和桌宠在这棵源码里版本相同，但基础写作只需要上面的主包。旧包迁移见 [升级说明](docs/user/upgrade-backup.md)。后续写作步骤见 [第一本书与第一章](docs/user/first-book.md)。
 
 ## 文档
 
