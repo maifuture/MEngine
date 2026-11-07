@@ -1,0 +1,52 @@
+{
+  "name": "@linfengqaqtat/dsh-scriptor-full",
+  "version": "8.4.0",
+  "description": "网文写作工作台完整版（含可选嵌入提供方）",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "webnovel",
+    "writing",
+    "chinese-novel",
+    "ai-writing",
+    "full-package"
+  ],
+  "homepage": "https://lingfengqaq.github.io/webnovel-writer/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lingfengQAQ/webnovel-writer.git",
+    "directory": "packages/meta"
+  },
+  "bugs": {
+    "url": "https://github.com/lingfengQAQ/webnovel-writer/issues"
+  },
+  "license": "GPL-3.0-only",
+  "dsh": {
+    "bundle": {
+      "patch": [
+        "./cordis.patch.yml",
+        "./presets/writing.patch.yml"
+      ]
+    }
+  },
+  "files": [
+    "cordis.patch.yml",
+    "README.md",
+    "RELEASE_NOTES.md",
+    "LICENSE",
+    "presets/*.yml"
+  ],
+  "author": "lingfengQAQ",
+  "dependencies": {
+    "@linfengqaqtat/dsh-scriptor": "workspace:*",
+    "@linfengqaqtat/dsh-scriptor-retrieval": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "dsh": "0.2.2-rc.1"
+  }
+}

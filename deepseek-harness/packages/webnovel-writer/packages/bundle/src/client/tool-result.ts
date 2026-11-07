@@ -1,0 +1,166 @@
+import type { ToolCallPhaseProps } from '@deepseek-ai/dsh-client-ui-tool/client'
+import { isStoppedError } from '../study/workflow-types'
+
+export const novelToolTitles: Readonly<Record<string, string>> = {
+  novel_reference_source: '管理参考小说', novel_reference_analyze: '渐进拆解小说',
+  novel_reference_query: '查找参考机制', novel_reference_report: '保存拆书成果',
+  novel_select_book: '选择作品', novel_create_book: '创建作品', novel_update_contract: '更新作品契约',
+  novel_get_story_status: '查看写作状态', novel_search_finalized: '检索定稿', novel_index_manage: '管理检索索引',
+  novel_prepare_pack: '准备定稿包', novel_settle_chapter: '定稿入档', novel_new_outline_draft: '准备大纲草案',
+  novel_confirm_outline: '确认大纲', novel_update_skeleton: '更新故事骨架', novel_update_volume_layout: '更新分卷布局',
+  novel_roll_window: '更新近期窗口', novel_confirm_worldbook_entry: '确认世界书', novel_confirm_volume_outline: '确认卷纲',
+  novel_assemble_materials: '组装写作材料', novel_apply_revision: '应用改稿', novel_apply_revision_batch: '应用批次改稿',
+  novel_import_draft: '导入草稿', novel_record_review_findings: '记录审读结果', novel_record_proposal: '记录提案',
+  novel_resolve_proposal: '处置提案', novel_apply_retcon: '应用吃书补偿', novel_record_memory: '记录记忆',
+  novel_note_pending: '记录待补事项', novel_get_book_progress: '查看作品进度',
+  novel_editor_suggest: '交回编辑建议',
+}
+
+export interface NovelResultModel {
+  state: 'preparing' | 'running' | 'success' | 'attention' | 'error' | 'stopped' | 'unknown'
+  label: string
+  summary: string
+  facts: readonly { label: string; value: string }[]
+  raw: string
+  args: string
+  report?: string
+}
+
+const object = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
+const text = (value: unknown): string | undefined => typeof value === 'string' && value.trim() ? value : undefined
+
+/** Read only the frozen result, never infer current book state from a historical call. */
+export function novelResultModel(props: ToolCallPhaseProps): NovelResultModel {
+  const base = { facts: [], raw: '', args: '' }
+  if (props.phase === 'preparing') return { ...base, state: 'preparing', label: '准备中', summary: '正在准备调用参数' }
+  if (props.phase === 'start') return { ...base, args: props.block.argsRaw, state: 'running', label: '进行中', summary: '等待本次操作返回结果' }
+  const block = props.block
+  const raw = block.content.map(item => item.type === 'text' ? item.text : JSON.stringify(item, null, 2)).join('\n')
+  const result: NovelResultModel = { ...base, raw, args: block.call?.argsRaw ?? '', state: 'unknown', label: '待核对', summary: '结果格式无法识别，请查看原始详情' }
+  // Runtime failure always wins, even if a partial result contains ok:true.
+  if (isStoppedError(block.error)) return { ...result, state: 'stopped', label: '已中断', summary: '操作已中断；继续前请核对已产生的结果' }
+  if (block.isError) return { ...result, state: 'error', label: '执行异常', summary: '请查看错误详情，核对已产生的结果后再决定是否重试' }
+  if (block.content.length !== 1 || block.content[0]?.type !== 'text') return result
+  let value: unknown
+  try { value = JSON.parse(raw) } catch { return result }
+  if (!object(value) || typeof value.ok !== 'boolean') return result
+  if (!value.ok || value.commitState === 'failed') return { ...result, state: 'error', label: '未完成', summary: text(value.reason) ?? text(value.message) ?? '本次操作未完成，请查看详情' }
+  const facts: { label: string; value: string }[] = []
+  if (value.scope === 'book' || value.scope === 'author') facts.push({ label: '记忆归属', value: value.scope === 'book' ? '本书' : '作者' })
+  if (typeof value.changed === 'boolean') facts.push({ label: '文件', value: value.changed ? '已更新' : '无变化' })
+  for (const [key, label] of [['bookName', '作品'], ['bookId', '书 ID'], ['卷', '当前卷'], ['规划卷', '规划目标卷']] as const) {
+    if (typeof value[key] === 'string' || typeof value[key] === 'number') facts.push({ label, value: String(value[key]) })
+  }
+  let pending = false
+  if (typeof value.verifiedBatches === 'number') facts.push({ label: '已校验批次', value: String(value.verifiedBatches) })
+  if (typeof value.fullBookComplete === 'boolean') facts.push({ label: '报告范围', value: value.fullBookComplete ? '全书可读正文' : '局部拆解' })
+  if (typeof value.selectedRangeComplete === 'boolean') facts.push({ label: '选定范围', value: value.selectedRangeComplete ? '已完成' : '尚未完成' })
+  if (Array.isArray(value.issues) && value.issues.length) { pending = true; facts.push({ label: '待核对问题', value: String(value.issues.length) }) }
+  for (const key of ['待处置数', '待继承处置数', '待回写模块', '未决偏离', '待核对', '疑似占位待核对', '内容问题']) {
+    const item = value[key]
+    const count = Array.isArray(item) ? item.length : typeof item === 'number' && Number.isFinite(item) && item >= 0 ? item : undefined
+    if (count !== undefined) { facts.push({ label: key, value: String(count) }); if (count > 0) pending = true }
+  }
+  if (object(value.design)) {
+    if (text(value.design.建议)) facts.push({ label: '设计建议', value: value.design.建议 as string })
+    for (const key of ['已确认无内容', '内容问题']) {
+      const issues = value.design[key]
+      if (Array.isArray(issues) && issues.length > 0) { pending = true; facts.push({ label: key, value: String(issues.length) }) }
+    }
+  }
+  if (typeof value.完成 === 'boolean') facts.push({ label: '模块回写', value: value.完成 ? '全部回写' : '尚未全部回写' })
+  if (typeof value.审核通过 === 'boolean') facts.push({ label: '审核', value: value.审核通过 ? '通过' : '尚未通过' })
+  pending ||= value.完成 === false || value.审核通过 === false
+  const commitLabels: Record<string, string> = { committed: '已提交', unchanged: '无变化，无需重复提交', 'not-required': '无需提交' }
+  if (typeof value.commitState === 'string') {
+    if (!commitLabels[value.commitState]) return result
+    facts.push({ label: '提交', value: commitLabels[value.commitState]! })
+  }
+  return { ...result, facts, ...(text(value.渲染) ? { report: value.渲染 as string } : {}), state: pending ? 'attention' : 'success', label: pending ? '有待处理项' : value.commitState === 'unchanged' ? '无变化' : '操作成功',
+    summary: text(value.reason) ?? text(value.message) ?? (pending ? '本次操作已返回，仍有事项需要核对' : '本次操作已完成，可展开查看结果'),
+  }
+}
+
+export type EditorDecisionLabel = 'accepted' | 'rejected' | 'reopened' | 'cancelled' | 'expired'
+export type EditorIntentLabel = 'polish' | 'expand' | 'condense' | 'review' | 'continue' | 'custom'
+
+export interface EditorSuggestionOverlay {
+  decision?: EditorDecisionLabel
+  intent?: EditorIntentLabel
+}
+
+const DECISION_LABEL: Record<EditorDecisionLabel, string> = {
+  accepted: '已采纳', rejected: '已拒绝', reopened: '已撤销采纳', cancelled: '已取消', expired: '已过期',
+}
+const AUTHOR_SUCCESS = '已送到编辑器，由作者决定是否采用'
+const DECISION_SUMMARY: Record<EditorDecisionLabel, string> = {
+  accepted: '作者已采纳这条建议', rejected: '作者已拒绝这条建议', reopened: '作者已撤销采纳',
+  cancelled: '作者已取消这条请求', expired: '这条请求已过期',
+}
+/** Author-facing lines for the four model-facing failure reasons. Anything else stays generic. */
+const AUTHOR_FAILURE: Readonly<Record<string, string>> = {
+  '未知请求编号；只有书房编辑器发来的请求才能用此工具回复。': '未知编号',
+  '作者已取消此请求，停止处理，不要改写文件。': '作者已取消',
+  '该请求已经回复过；作者需要新版本时会重新发起。': '已交回过',
+  '此请求已结束且没有交回结果；作者需要新版本时会重新发起，不要改写文件。': '请求已结束未交回',
+}
+const AUTHOR_FAILURE_GENERIC = '这次没有交回编辑建议'
+const INTENT_LABEL: Record<EditorIntentLabel, string> = {
+  polish: '润色', expand: '扩写', condense: '精简', review: '审读', continue: '续写', custom: '按要求改',
+}
+const KIND_LABEL: Record<string, string> = { replace: '替换建议', insert: '续写', comments: '审读批注', none: '无需改动' }
+
+function parsed(raw: string): Record<string, unknown> | undefined {
+  if (!raw.trim()) return undefined
+  try {
+    const value: unknown = JSON.parse(raw)
+    return object(value) ? value : undefined
+  } catch { return undefined }
+}
+
+export function editorRequestId(props: ToolCallPhaseProps): string | undefined {
+  if (props.phase === 'preparing') return undefined
+  const args = parsed(props.phase === 'start' ? props.block.argsRaw : props.block.call?.argsRaw ?? '')
+  const fromArgs = text(args?.requestId)
+  if (fromArgs) return fromArgs
+  if (props.phase !== 'result') return undefined
+  const raw = props.block.content.map(item => item.type === 'text' ? item.text : '').join('\n')
+  return text(parsed(raw)?.requestId)
+}
+
+/** Frozen tool output, plus the author's decision only while this page still has it. A refresh passes no overlay. */
+export function editorSuggestionModel(props: ToolCallPhaseProps, overlay?: EditorSuggestionOverlay): NovelResultModel {
+  const base = { facts: [] as { label: string; value: string }[], raw: '', args: '' }
+  const requestId = editorRequestId(props)
+  const argsRaw = props.phase === 'preparing' ? '' : props.phase === 'start' ? props.block.argsRaw : props.block.call?.argsRaw ?? ''
+  const args = parsed(argsRaw)
+  const facts: { label: string; value: string }[] = []
+  if (requestId) facts.push({ label: '编号', value: '#' + requestId })
+  const kind = text(args?.kind)
+  const kindLabel = kind ? KIND_LABEL[kind] : undefined
+  if (kindLabel) facts.push({ label: '类型', value: kindLabel })
+  const intentLabel = overlay?.intent ? INTENT_LABEL[overlay.intent] : undefined
+  if (intentLabel) facts.push({ label: '意图', value: intentLabel })
+  const note = text(args?.note)
+  if (note) facts.push({ label: '说明', value: note })
+  const decisionLabel = overlay?.decision ? DECISION_LABEL[overlay.decision] : undefined
+  if (decisionLabel) facts.push({ label: '作者决定', value: decisionLabel })
+  if (props.phase === 'preparing') return { ...base, state: 'preparing', label: '准备中', summary: '正在准备调用参数' }
+  if (props.phase === 'start') return { ...base, facts, args: argsRaw, state: 'running', label: '进行中', summary: '等待把建议交回编辑器' }
+  const block = props.block
+  const raw = block.content.map(item => item.type === 'text' ? item.text : JSON.stringify(item, null, 2)).join('\n')
+  const result: NovelResultModel = { ...base, facts, raw, args: argsRaw, state: 'unknown', label: '待核对', summary: '结果格式无法识别，请查看原始详情' }
+  if (isStoppedError(block.error)) return { ...result, state: 'stopped', label: '已中断', summary: '操作已中断；继续前请核对已产生的结果' }
+  if (block.isError) return { ...result, state: 'error', label: '执行异常', summary: '请查看错误详情，核对已产生的结果后再决定是否重试' }
+  if (block.content.length !== 1 || block.content[0]?.type !== 'text') return result
+  const value = parsed(raw)
+  if (!value || typeof value.ok !== 'boolean') return result
+  if (!value.ok) {
+    const reason = text(value.reason)
+    return { ...result, state: 'error', label: '未完成', summary: (reason && AUTHOR_FAILURE[reason]) ?? AUTHOR_FAILURE_GENERIC }
+  }
+  return {
+    ...result, state: 'success', label: '已交回',
+    summary: (overlay?.decision && DECISION_SUMMARY[overlay.decision]) || AUTHOR_SUCCESS,
+  }
+}

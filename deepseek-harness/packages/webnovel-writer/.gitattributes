@@ -1,0 +1,20 @@
+# Normalize source and documentation on all supported development platforms.
+*.md text eol=lf
+*.py text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.txt text eol=lf
+*.css text eol=lf
+*.srt text eol=lf
+*.vtt text eol=lf
+LICENSE text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.node-version text eol=lf
+.npmrc text eol=lf

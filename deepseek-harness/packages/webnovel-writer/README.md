@@ -1,0 +1,126 @@
+# DSH Scriptor · Webnovel Writer v8
+
+**[🌐 产品主页](https://lingfengqaq.github.io/webnovel-writer/) · [📖 新手教程](https://lingfengqaq.github.io/webnovel-writer/docs/beginner.html) · [下载正式版](https://github.com/lingfengQAQ/webnovel-writer/releases/latest)**
+
+> Scriptor 8.4.0 正式版配套 **DSH 0.2.2-rc.1**，三个功能插件与完整版均为 8.4.0。8.3.2 仍只配套 DSH 0.2.1-rc.3。旧版升级先备份，参阅安装与升级说明。
+
+基于 [DeepSeek Harness](https://www.deepseek.com/harness/) 的长篇小说写作工作台。把构想、设定、大纲、写章、审读、修改、定稿、记忆与导出放进一个能够暂停和继续的工作流程，作品以本地文件保存。
+
+**正式版：8.4.0。** Windows 首发；重要作品使用前请备份。模型服务由你配置，调用可能产生费用。
+
+[![DSH Scriptor 项目介绍视频](docs/user/images/video-poster.png)](docs/user/media/intro.mp4)
+
+> 📹 **2 分钟视频快速了解 DSH Scriptor**：[点击播放或下载视频 (1080P/MP4)](docs/user/media/intro.mp4) · [字幕文件](docs/user/media/intro.srt)  
+> 视频演示了核心设计理念、全流程写作闭环、断更无损恢复以及书稿编辑器的交互操作。
+
+DSH Scriptor is a local-first fiction writing workspace for DeepSeek Harness. Version 8.4.0 runs on DeepSeek Harness 0.2.2-rc.1. Version 8.3.2 remains the release for 0.2.1-rc.3. Runtime prompts and skills are included; model services are configured by the user.
+
+**8.4.0 升级须知：先升级 DSH 至 0.2.2-rc.1，再更新已用组件。** 仍使用 DSH 0.2.1-rc.3 时，请保留 Scriptor 8.3.2；DSH 0.2.1-rc.2 保留 8.3.1；DSH 0.2.0-rc.2 继续配套 Scriptor 8.2.2。重启后，新建对话并选择“写作模式”。AI 写作、润色、续写与审读在此模式下使用；旧书打开原工作区继续，旧对话不会自动迁移。尚未配置章节篇幅时，再补充并确认契约。先备份并保留原契约内容，再约定目标汉字数与宽松上下限。未配置的旧书仍可继续使用，但不会启用篇幅范围核对。完整步骤和可复制请求见 [旧项目契约更新](docs/user/upgrade-backup.md#旧项目需要更新作品契约)。
+
+本版把写作插件接到 DSH 0.2.2-rc.1 的工具执行器。写作流程、技能和书仓格式沿用 8.3.2。写作、检索增强、完整版和鲸鱼娘同批发行。书稿编辑器继续支持选区改写、行内建议和逐条采纳；采纳后仍需保存。详见 [新编辑器图文教程](docs/user/editor.md)。
+
+## 创作工作流程
+
+Scriptor 将长篇小说的生产拆分为**作品设计**与**章节闭环**两个阶段，每一步都有明确的真源工件和 Git 提交记录：
+
+```
+┌───────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐
+│ 灵感与立项 │ ──► │ 作品契约  │ ──► │  世界书   │ ──► │ 卷章大纲  │
+│ (开放探索) │     │ (定调与禁区)│    │(人物/规则/地点)│   │ (骨架/分卷/窗口)│
+└───────────┘     └───────────┘     └───────────┘     └───────────┘
+                                                            │
+┌─────────────────────────── 每一章的创作闭环 ───────────────▼───────────┐
+│                                                                        │
+│   ┌────────┐     ┌────────┐     ┌────────┐     ┌────────┐              │
+│   │ 确认细纲│ ──► │ 写作备料│ ──► │ 正文起草│ ──► │ 八维审读│ ──┐           │
+│   └────────┘     └────────┘     └────────┘     └────────┘   │ (有发现项) │
+│                                                     ▲       ▼          │
+│   ┌────────┐     ┌────────┐                    ┌────┴──────────┐       │
+│   │ 定稿入档│ ◄── │ 作者裁决│ ◄──────────────────┤ 处置批改稿    │       │
+│   │(ch:提交)│    │ (唯一门禁)│   (审读全部通过)   └───────────────┘       │
+│   └────────┘     └────────┘                                            │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+## 核心设计与解决痛点
+
+- **三区分治，真源纪律**：
+  - **草稿区**：自由创作与试错，支持多稿版本演化。
+  - **真源区**：作品契约、世界书、大纲、故事账本与本书记忆，只经专用工具更新，杜绝设定漂移。
+  - **定稿区**：只读不改；修正历史设定走规范补偿流程（retcon），全程留痕可追溯。
+- **断更无损恢复，告别上下文遗忘**：
+  - 创作进度完全从书仓 Markdown 实际文件与 Git 提交记录推导，不依赖易丢失的会话聊天上下文。无论停更数天还是数月，回到主对话说一句“继续”，即刻准确定位进度与当前待办。
+- **AI 辅助创作，作者牢牢掌舵**：
+  - 主控严守“不代写正文、不伪造审查结论、不代作者批准”原则。正文起草与润色交由专注子代理；最终定稿与情节走向的裁决权始终留给作者。
+- **书稿编辑器与写作模式**：
+  - 原地可视化选区：右键或快捷键（Ctrl+K）发起润色、扩写、精简、续写或审读批注；行内建议支持逐条采纳、拒绝或换一版，修改即时预览。
+- **八维多模块严苛审读**：
+  - 覆盖章节结构、人物塑造、情节节奏、世界观、主题情绪、伏笔悬念、文笔文风与文本规范八大维度，结合确定性正文汉字数统计，确保长篇连载质量稳定。
+
+## 选择版本
+
+| 产品线 | 运行环境 | 入口 |
+| --- | --- | --- |
+| v6 | Claude Code 插件 | [v6 文档与安装](https://github.com/lingfengQAQ/webnovel-writer/tree/master) |
+| v8（本分支） | DeepSeek Harness 工作台 | [下载正式版](https://github.com/lingfengQAQ/webnovel-writer/releases/tag/scriptor-v8.4.0) · [安装教程](docs/user/install.md) |
+
+两个版本安装方式不同。当前没有经过验证的 v6/v7 书仓直接迁移方案。`v8` 是产品线名称，`8.4.0` 是工作台安装包版本。
+
+## 能做什么
+
+- 从开放式灵感探索逐步收敛到作品契约、世界书和卷章大纲。
+- 导入本地 TXT/EPUB，确认范围与模型服务后渐进分析参考小说，保留证据和机制。
+- 生成章节草稿，执行审读、修改与定稿流程；关键写入保留作者确认。
+- 从实际文件校准进度，暂停后继续，记录故事账本和本书记忆。
+- 在书房查看、编辑和引用材料，浏览章节、故事图谱及当前会话的写作流程状态。
+- 检索已定稿内容；可选安装嵌入/场景/重排提供方。
+- 生成卷摘要候选、核对卷末状态、导出定稿合集和来源清单。
+
+主包包含 11 个运行技能和 8 个脚本入口。嵌入提供方是独立可选包，基础写作无需先配置向量服务。模型创作质量、长篇一致性和费用会随模型与操作方式变化，不承诺无人值守完成整本书。
+
+## 开始使用
+
+1. 安装配套的 **DSH 0.2.2-rc.1** 桌面端，打开侧栏 **插件 → 添加插件**。
+2. 输入 `@linfengqaqtat/dsh-scriptor@8.4.0`，核对预览并安装，按提示应用变更。
+3. 配置聊天模型与凭据，新建对话并选择 **写作模式**，打开作品工作区，按 [第一本书与第一章](docs/user/first-book.md) 开始。
+
+逐步说明见 [安装教程](docs/user/install.md) 和 [新手教程](docs/user/beginner.md)。正式版发布到 npm latest，教程使用精确版本便于核对宿主。
+
+| 可选插件 | 安装标识 | 用途 |
+| --- | --- | --- |
+| 检索增强 | `@linfengqaqtat/dsh-scriptor-retrieval@8.4.0` | 嵌入、场景识别、重排，分别配置和启用 |
+| 鲸鱼娘 | `@linfengqaqtat/dsh-scriptor-companion@8.4.0` | 窗口内陪伴与会话状态反馈，不调用模型 |
+| 完整版 | `@linfengqaqtat/dsh-scriptor-full@8.4.0` | 聚合写作和检索，不含桌宠；与单独安装二选一 |
+
+旧包迁移与备份见 [升级说明](docs/user/upgrade-backup.md)，不要同时启用旧检索包和新检索包。
+
+本次四包统一发行 8.4.0；检索增强与鲸鱼娘同步到同一版本，没有改检索算法或桌宠行为。只更新你实际使用的组件；不用检索或桌宠就无需安装它们。已验证的推荐组合为同版本，full 的主包与检索由依赖一起更新，桌宠始终独立。
+
+## 文档
+
+- [新手教程：从安装到第一章](docs/user/beginner.md)
+- [新编辑器：选区改写、批注、采纳与保存](docs/user/editor.md)
+- [界面与按钮参考](docs/user/ui-reference.md) · [增强索引操作指南](docs/user/enhanced-index.md)
+- [参考小说分析](docs/user/reference-analysis.md)
+- [日常写作与暂停恢复](docs/user/workflows.md)
+- [备份、升级、回退与卸载](docs/user/upgrade-backup.md)
+- [故障排查](docs/user/troubleshooting.md)
+- [模型费用、数据流与隐私](docs/user/privacy.md)
+- [从源码构建](docs/development.md) · [书仓格式与修改边界](docs/book-format.md)
+- [贡献与 PR 规范](CONTRIBUTING.md) · [发行规范](docs/maintenance/releasing.md) · [更新记录](CHANGELOG.md)
+
+## 赞助与交流
+
+欢迎在 [Discussions](https://github.com/lingfengQAQ/webnovel-writer/discussions) 交流使用体验。不便公开的交流或合作事宜，可以发邮件到 [ksdflisjdf@gmail.com](mailto:ksdflisjdf@gmail.com)。
+
+### 赞助商与广告合作
+
+欢迎支持项目的持续维护，也欢迎洽谈 README 赞助商展示与广告合作。有意合作请通过上述邮箱介绍品牌或产品、希望展示的内容及合作周期，具体形式另行沟通。合作展示会明确标注为赞助或广告。
+
+## 反馈与许可证
+
+[Bug / 功能建议](https://github.com/lingfengQAQ/webnovel-writer/issues/new/choose) 请注明 **v8 和精确安装包版本**。使用交流到 [Discussions](https://github.com/lingfengQAQ/webnovel-writer/discussions)。安全问题按 [SECURITY.md](SECURITY.md) 私下报告，不公开粘贴密钥或作品。
+
+项目继承 [GPL-3.0-only](LICENSE)，可依照许可证使用、修改及分发，包括商用；保留必要声明，并在分发时履行相应源码等义务。仅使用本工具创作不会自动要求你的小说采用 GPL。模型服务及第三方素材适用各自条款。
+
+保留 Webnovel Writer 项目来源及贡献者署名。主包的 [第三方声明](packages/bundle/THIRD_PARTY_NOTICES.md) 随发行件提供。
