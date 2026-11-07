@@ -106,7 +106,7 @@ pnpm --filter @linfengqaqtat/dsh-scriptor pack --pack-destination .
 2. 在「输入插件的包名、GitHub 仓库地址或本地目录路径」的输入框里，填入上一步生成的 tarball **完整路径**，例如：
    `~/MEngine/deepseek-harness/packages/webnovel-writer/linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz`
 3. 点击 **安装**。如果页面要求重启，从应用菜单完全退出 DeepSeek Harness，再打开。只关窗口可能仍留在托盘里，模式列表不会更新。
-4. 输入框旁的模式按钮仍会显示 **标准模式**。点开它，选择 **写作模式**。这个名字来自主包里的预设，不会自动变成当前模式。
+4. 完全退出并重新打开后，点开仍显示 **标准模式** 的菜单，选择 **写作模式**。它不会自动变成当前模式。空的首页上 **书稿** 是灰的；进入对话之后才能点。
 
 [第一本书](https://lingfengqaq.github.io/webnovel-writer/docs/first-book.html) 的第一步就是新建对话并选择「写作模式」。[安装页](https://lingfengqaq.github.io/webnovel-writer/docs/install.html) 列出四个插件，但写作模式只依赖上面这一个主包：
 
