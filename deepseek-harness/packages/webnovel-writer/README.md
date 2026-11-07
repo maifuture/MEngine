@@ -105,8 +105,17 @@ pnpm --filter @linfengqaqtat/dsh-scriptor pack --pack-destination .
 1. 打开 DSH Desktop **0.2.2-rc.1**，在侧栏进入 **插件 → 添加插件**。
 2. 在「输入插件的包名、GitHub 仓库地址或本地目录路径」的输入框里，填入上一步生成的 tarball **完整路径**，例如：
    `~/MEngine/deepseek-harness/packages/webnovel-writer/linfengqaqtat-dsh-scriptor-8.3.2-upgrade.tgz`
-3. 点击 **安装**，按提示启用或重启。
-4. 新建对话并选择 **写作模式**。
+3. 点击 **安装**。如果页面要求重启，从应用菜单完全退出 DeepSeek Harness，再打开。只关窗口可能仍留在托盘里，模式列表不会更新。
+4. 输入框旁的模式按钮仍会显示 **标准模式**。点开它，选择 **写作模式**。这个名字来自主包里的预设，不会自动变成当前模式。
+
+[第一本书](https://lingfengqaq.github.io/webnovel-writer/docs/first-book.html) 的第一步就是新建对话并选择「写作模式」。[安装页](https://lingfengqaq.github.io/webnovel-writer/docs/install.html) 列出四个插件，但写作模式只依赖上面这一个主包：
+
+| 插件 | 这次要不要装 | 作用 |
+| --- | --- | --- |
+| 写作工作台 | 要。就是这个 tarball | 书房、写作技能，以及「写作模式」 |
+| 检索增强 | 不要。本包未包含 | 可选的嵌入、场景识别、重排 |
+| 鲸鱼娘 | 不要。本包未包含 | 可选的桌宠 |
+| 完整版 | 不要 | 写作加检索的另一种入口，不能和主包同时装 |
 
 不要在这个输入框里填写包名来安装本升级。`8.3.2-upgrade` 没有发布到 npm，插件市场搜不到它。已发布的 8.3.2 只能留在 DSH 0.2.1-rc.3 上。
 
